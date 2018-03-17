@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">CUB</string>
     <string name="PostiveYesButton">Confirmar</string>
-    <string name="NegativeNoButton">Cancelar</string>
+    <string name="NegativeNoButton">Cafncelar</string>
     <string name="CleanCollectedData">Limpar dados recolhidos</string>
     <string name="CleanCollectedDataQuestion">Tem a certeza que deseja eliminar os dados recolhidos?</string>
 

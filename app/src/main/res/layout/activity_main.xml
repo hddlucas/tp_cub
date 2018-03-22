@@ -25,11 +25,11 @@
         android:layout_height="50dp"
         android:text="Start"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.879"
+        app:layout_constraintHorizontal_bias="0.868"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.296" />
+        app:layout_constraintVertical_bias="0.197" />
 
     <Button
         android:id="@+id/stopBtn"
@@ -38,11 +38,11 @@
         android:onClick="stopBtnClick"
         android:text="Stop"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.879"
+        app:layout_constraintHorizontal_bias="0.868"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.433" />
+        app:layout_constraintVertical_bias="0.338" />
 
     <Button
         android:id="@+id/submitBtn"
@@ -51,11 +51,11 @@
         android:onClick="submitBtnClick"
         android:text="Submit"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.879"
+        app:layout_constraintHorizontal_bias="0.868"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.566" />
+        app:layout_constraintVertical_bias="0.464" />
 
     <RadioGroup
         android:id="@+id/atividadesRadioGrp"
@@ -102,24 +102,6 @@
             android:text="Agachar" />
 
     </RadioGroup>
-
-    <Button
-        android:id="@+id/clearBtn"
-        android:layout_width="23dp"
-        android:layout_height="23dp"
-        android:layout_gravity="right|bottom"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/ic_clear_black_24dp"
-        android:onClick="clearBtnClick"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.947"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.665" />
 
 
     <ScrollView

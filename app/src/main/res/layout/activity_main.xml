@@ -57,39 +57,51 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.566" />
 
-    <RadioButton
-        android:id="@+id/gpsRadioBtn"
-        android:layout_width="wrap_content"
+    <RadioGroup
+        android:id="@+id/atividadesRadioGrp"
+        android:layout_width="137dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="172dp"
-        android:text="GPS"
-        app:layout_constraintEnd_toStartOf="@+id/startBtn"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <RadioButton
-        android:id="@+id/acelerometroRadioBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="49dp"
-
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="240dp"
-        android:text="Acelerómetro"
+        android:layout_marginBottom="260dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/stopBtn"
-        app:layout_constraintHorizontal_bias="0.131"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintEnd_toStartOf="@+id/startBtn"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent">
 
+
+        <RadioButton
+            android:id="@+id/correrRadioBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Correr"
+            android:checked="true"
+            tools:layout_editor_absoluteY="145dp" />
+
+        <RadioButton
+            android:id="@+id/andarRadioBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Andar" />
+
+        <RadioButton
+            android:id="@+id/descerRadioBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Descer" />
+
+        <RadioButton
+            android:id="@+id/subirRadioBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subir"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <RadioButton
+            android:id="@+id/agacharRadioBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agachar" />
+
+    </RadioGroup>
 
     <Button
         android:id="@+id/clearBtn"
@@ -101,12 +113,12 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/ic_clear_black_24dp"
+        android:onClick="clearBtnClick"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.947"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:onClick="clearBtnClick"
         app:layout_constraintVertical_bias="0.665" />
 
 
@@ -129,6 +141,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="33dp"
             android:inputType="textMultiLine" />
+
 
     </ScrollView>
 

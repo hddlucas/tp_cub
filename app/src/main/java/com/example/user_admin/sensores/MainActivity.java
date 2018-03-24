@@ -82,45 +82,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void clearBtnClick(View view) {
-        showDialog();
-    }
-
-    /**
-     * @throws Resources.NotFoundException
-     */
-    private void showDialog() throws Resources.NotFoundException {
-        new AlertDialog.Builder(this)
-                .setTitle(getResources().getString(R.string.CleanCollectedData))
-                .setMessage(
-                        getResources().getString(R.string.CleanCollectedDataQuestion))
-                .setIcon(
-                        getResources().getDrawable(
-                                android.R.drawable.ic_dialog_alert))
-                .setPositiveButton(
-                        getResources().getString(R.string.PostiveYesButton),
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                                int which) {
-                                //Do Something Here
-                                logsTxtBox.setText("");
-
-                            }
-                        })
-                .setNegativeButton(
-                        getResources().getString(R.string.NegativeNoButton),
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                                int which) {
-                                //Do Something Here
-
-                            }
-                        }).show();
-    }
 }
 
 

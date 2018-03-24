@@ -29,11 +29,11 @@ public class MainActivity extends AppCompatActivity {
     //variables
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
     private  String TAG_WRITE_READ_FILE = "TAG_WRITE_READ_FILE";
-    private String dataFileName = "sensores.csv";
 
     //elements
     Button startBtn;
     TextView logsTxtBox;
+    private String dataFileName = "sensores.csv";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,20 @@ public class MainActivity extends AppCompatActivity {
         permissions.checkLocationPermissions();
 
         //check external write permissions
-        permissions.checkWriteExternalStoragePermission();
+        //permissions.checkWriteExternalStoragePermission();
+
+
+        String filename = "myfile";
+        String fileContents = "Hello world!";
+        FileOutputStream outputStream;
+
+        try {
+            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(fileContents.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // show location button click event
         startBtn.setOnClickListener(new View.OnClickListener() {
@@ -70,17 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
                     TextView logsTxtBox = (TextView) findViewById(R.id.logsTxtBox);
                     logsTxtBox.append("Posição Atual: Lat: " + latitude + " Long: " + longitude + " Altitude: " + altitude + "\n");
-                    String filename = "myfile";
-                    String fileContents = "Hello world!";
-                    FileOutputStream outputStream;
 
-                    try {
-                        outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                        outputStream.write(fileContents.getBytes());
-                        outputStream.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
 
                 } else {
                     // can't get location

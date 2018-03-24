@@ -32,9 +32,10 @@ public class GPSTracker extends Service implements LocationListener {
     Location location; // location
     double latitude; // latitude
     double longitude; // longitude
+    double altitude; // altitude
 
     // The minimum distance to change Updates in meters
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 2; // 10 meters
 
     // The minimum time between updates in milliseconds
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
@@ -47,10 +48,8 @@ public class GPSTracker extends Service implements LocationListener {
         getLocation();
     }
 
-    public Location getLocation() {
+    public Location getLocation() throws SecurityException {
         try {
-
-
 
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
@@ -127,10 +126,20 @@ public class GPSTracker extends Service implements LocationListener {
         if(location != null){
             latitude = location.getLatitude();
         }
-
-        // return latitude
         return latitude;
     }
+
+
+    /**
+     * Function to get altitude
+     * */
+    public double getAltitude(){
+        if(location != null){
+            altitude = location.getAltitude();
+        }
+        return altitude;
+    }
+
 
     /**
      * Function to get longitude
@@ -139,8 +148,6 @@ public class GPSTracker extends Service implements LocationListener {
         if(location != null){
             longitude = location.getLongitude();
         }
-
-        // return longitude
         return longitude;
     }
 
@@ -186,6 +193,7 @@ public class GPSTracker extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+        getLocation();
     }
 
     @Override

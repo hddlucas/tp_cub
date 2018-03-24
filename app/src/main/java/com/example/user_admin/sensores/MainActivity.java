@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     // GPSTracker class
     GPSTracker gps;
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
-    
+
     //elements
     Button startBtn;
     TextView logsTxtBox;

@@ -4,19 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     tools:context="com.example.user_admin.sensores.MainActivity">
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="173dp"
+        android:layout_width="222dp"
         android:layout_height="0dp"
         android:layout_marginTop="33dp"
         android:text="Computação Obíqua"
         android:textAlignment="center"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="18sp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:textColor="@color/textColorPrimary"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -62,9 +64,11 @@
         android:layout_width="137dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="260dp"
+        android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/startBtn"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.545"
+
         app:layout_constraintStart_toStartOf="parent">
 
 
@@ -72,34 +76,44 @@
             android:id="@+id/correrRadioBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Correr"
             android:checked="true"
+            android:text="Correr"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16sp"
             tools:layout_editor_absoluteY="145dp" />
 
         <RadioButton
             android:id="@+id/andarRadioBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Andar" />
+            android:text="Andar"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16sp" />
 
         <RadioButton
             android:id="@+id/descerRadioBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Descer" />
+            android:text="Descer"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16sp" />
 
         <RadioButton
             android:id="@+id/subirRadioBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Subir"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16sp"
             app:layout_constraintTop_toTopOf="parent" />
 
         <RadioButton
             android:id="@+id/agacharRadioBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Agachar" />
+            android:text="Agachar"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16sp" />
 
     </RadioGroup>
 
@@ -107,7 +121,7 @@
     <ScrollView
         android:id="@+id/ScrollView01"
         android:layout_width="325dp"
-        android:layout_height="141dp"
+        android:layout_height="213dp"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"

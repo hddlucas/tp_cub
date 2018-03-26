@@ -43,7 +43,7 @@ public class FileManager {
             e.printStackTrace();
         }
 
-        return null;
+        return "";
     }
 
 
@@ -53,13 +53,25 @@ public class FileManager {
         FileOutputStream outputStream;
 
         try {
-            outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
+            // append to file
             outputStream.write(dataToSave.getBytes());
             outputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    // This method will save data in internal storage file
+    public  void deleteFile(String filename)
+    {
+        try {
+            context.deleteFile(filename);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

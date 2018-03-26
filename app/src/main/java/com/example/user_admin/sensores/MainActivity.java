@@ -7,6 +7,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -14,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     GPSTracker gps;
     FileManager fileManager;
     Permissions permissions;
+    Utils utils;
 
     //variables
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
@@ -44,8 +48,13 @@ public class MainActivity extends AppCompatActivity {
         // create GPSTracker class object
         gps = new GPSTracker(MainActivity.this);
 
+        // create Utils class object
+        utils = new Utils(MainActivity.this);
+
         // create FileManager class object
         fileManager = new FileManager(MainActivity.this);
+
+        fileManager.deleteFile(sensorsDataFilename);
 
         // show location button click event
         startBtn.setOnClickListener(new View.OnClickListener() {
@@ -64,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
                     TextView logsTxtBox = (TextView) findViewById(R.id.logsTxtBox);
                     logsTxtBox.append("Posição Atual: Lat: " + latitude + " Long: " + longitude + " Altitude: " + altitude + "\n");
-
-                    fileManager.writeDataToFile(sensorsDataFilename,"oi");
+                    
+                    fileManager.writeDataToFile(sensorsDataFilename,latitude + "," + longitude + "," + altitude + "," + utils.getCurrentDate("dd-mm-yy") + "," + utils.getCurrentTime("hh:mm:ss") + "\n");
 
 
                 } else {

@@ -1,34 +1,25 @@
 package com.example.user_admin.sensores;
 
-import android.Manifest;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
     //Classes
     GPSTracker gps;
-    FileManager fm;
+    FileManager fileManager;
     Permissions permissions;
 
     //variables
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
     private  String TAG_WRITE_READ_FILE = "TAG_WRITE_READ_FILE";
+    //file to store sensors data
+    public static final String sensorsDataFilename = "sensors.csv";
 
     //elements
     Button startBtn;
@@ -50,27 +41,17 @@ public class MainActivity extends AppCompatActivity {
         //check external write permissions
         //permissions.checkWriteExternalStoragePermission();
 
+        // create GPSTracker class object
+        gps = new GPSTracker(MainActivity.this);
 
-        String filename = "myfile";
-        String fileContents = "Hello world!";
-        FileOutputStream outputStream;
-
-        try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(fileContents.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // create FileManager class object
+        fileManager = new FileManager(MainActivity.this);
 
         // show location button click event
         startBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-
-                // create class object
-                gps = new GPSTracker(MainActivity.this);
 
                 // check if GPS enabled
                 if (gps.canGetLocation()) {
@@ -83,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
                     TextView logsTxtBox = (TextView) findViewById(R.id.logsTxtBox);
                     logsTxtBox.append("Posição Atual: Lat: " + latitude + " Long: " + longitude + " Altitude: " + altitude + "\n");
+
+                    fileManager.writeDataToFile(sensorsDataFilename,"oi");
 
 
                 } else {
@@ -103,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
         gps.stopUsingGPS();
         logsTxtBox.setText("");
         Toast.makeText(this, "Pausou a recolha de dados!", Toast.LENGTH_SHORT).show();
+
+        // test if information is being saved on internal storage file
+        logsTxtBox.append(fileManager.readFromFileInputStream(sensorsDataFilename));
+
     }
 
     public void submitBtnClick(View view) {

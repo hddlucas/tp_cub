@@ -46,7 +46,6 @@ public class FileManager {
         return "";
     }
 
-
     // This method will save data in internal storage file
     public  void writeDataToFile(String filename, String dataToSave)
     {
@@ -60,7 +59,6 @@ public class FileManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     // This method will save data in internal storage file

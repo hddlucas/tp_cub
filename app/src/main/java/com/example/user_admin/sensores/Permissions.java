@@ -20,7 +20,7 @@ public class Permissions extends Activity{
         this.context = context;
     }
 
-    //check Location Permissions
+    //check Location Run Time Permissions
     public void checkLocationPermissions() {
         if (ContextCompat.checkSelfPermission(context.getApplicationContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION)

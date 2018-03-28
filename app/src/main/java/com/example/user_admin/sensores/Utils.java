@@ -18,6 +18,7 @@ public class Utils {
         this.context = context;
     }
 
+    //this method is used to get the current date in a format sent as input parameter of the function
     public String getCurrentDate(String dateFormat){
         Date c = Calendar.getInstance().getTime();
         SimpleDateFormat df = new SimpleDateFormat(dateFormat);
@@ -26,6 +27,7 @@ public class Utils {
         return currentDate;
     }
 
+    //this method is used to get the current time in a format sent as input parameter of the function
     public String getCurrentTime(String timeFormat){
         Date c = Calendar.getInstance().getTime();
         SimpleDateFormat df = new SimpleDateFormat(timeFormat);

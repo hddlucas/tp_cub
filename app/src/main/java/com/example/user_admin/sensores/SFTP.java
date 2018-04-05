@@ -7,16 +7,18 @@ import com.jcraft.jsch.*;
 
 public class SFTP {
 
-    public void uplodateFileWithExternalSFTPServer(){
+    //this method is used to upload file with external SFTP Server
+    //server:urbysense.dei.uc.pt login: cubistudent pw: mis_cubi_2018
+    public void uplodateFileWithExternalSFTPServer(String fileName){
     try {
         JSch ssh = new JSch();
-        Session session = ssh.getSession("username", "myip90000.ordomain.com", 22);
+        Session session = ssh.getSession("cubistudent", "urbysense.dei.uc.pt", 22);
         // Remember that this is just for testing and we need a quick access, you can add an identity and known_hosts file to prevent
         // Man In the Middle attacks
         java.util.Properties config = new java.util.Properties();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
-        session.setPassword("Passw0rd");
+        session.setPassword("mis_cubi_2018");
 
         session.connect();
         Channel channel = session.openChannel("sftp");

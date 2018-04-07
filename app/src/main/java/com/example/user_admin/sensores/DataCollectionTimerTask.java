@@ -1,6 +1,7 @@
 package com.example.user_admin.sensores;
 
 import android.app.Activity;
+import android.view.View;
 import android.widget.TextView;
 import java.util.TimerTask;
 import static com.example.user_admin.sensores.MainActivity.SENSORSDATAFILENAME;
@@ -18,6 +19,7 @@ public class DataCollectionTimerTask extends TimerTask {
     Permissions permissions;
     Utils utils;
     TextView logsTxtBox;
+    TextView gpsTextView;
 
     private final Activity mActivity;
 
@@ -39,8 +41,8 @@ public class DataCollectionTimerTask extends TimerTask {
         // create FileManager class object
         fileManager = new FileManager(mActivity);
 
-        double latitude = gps.getLatitude();
-        double longitude = gps.getLongitude();
+        final double latitude = gps.getLatitude();
+        final double longitude = gps.getLongitude();
         double altitude = gps.getAltitude();
 
         float accX = acc.getLastX();
@@ -54,6 +56,11 @@ public class DataCollectionTimerTask extends TimerTask {
 
             @Override
             public void run() {
+
+                //Update GPS position label:
+                gpsTextView=  mActivity.findViewById(R.id.gpsTextView);
+                gpsTextView.setText("GPS: " + latitude + " ; " + longitude);
+
                 //read sensors data file  stored in internal memory
                 String fileContent = fileManager.readFromFileInputStream(SENSORSDATAFILENAME);
                 logsTxtBox=  mActivity.findViewById(R.id.logsTxtBox);

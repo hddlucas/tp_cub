@@ -18,6 +18,7 @@ import static com.example.user_admin.sensores.MainActivity.SENSORSDATAFILENAME;
 public class SFTP implements Runnable {
 
     private Context context;
+    FileManager fileManager;
 
     public SFTP(Context context) {
         this.context = context;
@@ -30,7 +31,7 @@ public class SFTP implements Runnable {
     public void run() {
         try {
 
-            File file = new File(context.getFilesDir()+ "/"+ SENSORSDATAFILENAME);
+            File file = new File(context.getFilesDir() + "/" + SENSORSDATAFILENAME);
 
             if (file.exists()) {
 
@@ -61,13 +62,17 @@ public class SFTP implements Runnable {
 
                 if (success) {
                     Toast.makeText(context, "Ficheiro submetido com sucesso!", Toast.LENGTH_SHORT).show();
-                }
-                else{
+                    fileManager = new FileManager(context);
+                    fileManager.deleteFile(SENSORSDATAFILENAME);
+
+                } else {
                     Toast.makeText(context, "Ocorreu um problema ao transferir o ficheiro!!", Toast.LENGTH_SHORT).show();
                 }
 
                 channel.disconnect();
                 session.disconnect();
+            } else {
+                Toast.makeText(context, "O ficheiro não existe!", Toast.LENGTH_SHORT).show();
             }
 
         } catch (JSchException e) {

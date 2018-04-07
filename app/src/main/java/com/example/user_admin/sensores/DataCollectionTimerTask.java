@@ -57,14 +57,14 @@ public class DataCollectionTimerTask extends TimerTask {
             @Override
             public void run() {
 
-                //Update GPS position label:
+       /*         //Update GPS position label:
                 gpsTextView=  mActivity.findViewById(R.id.gpsTextView);
                 gpsTextView.setText("GPS: " + latitude + " ; " + longitude);
 
                 //read sensors data file  stored in internal memory
                 String fileContent = fileManager.readFromFileInputStream(SENSORSDATAFILENAME);
                 logsTxtBox=  mActivity.findViewById(R.id.logsTxtBox);
-                logsTxtBox.setText(fileContent);
+                logsTxtBox.setText(fileContent);*/
             }});
     }
 }

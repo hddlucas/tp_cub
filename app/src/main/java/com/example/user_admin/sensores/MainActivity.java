@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Classes
     GPSTracker gps;
+    accelerometerTracker acc;
     FileManager fileManager;
     Permissions permissions;
     Utils utils;
@@ -65,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View arg0) {
-
                 gps = new GPSTracker(MainActivity.this);
+                acc = new accelerometerTracker(MainActivity.this);
 
                 if(gps.canGetLocation) {
                     Toast.makeText(getApplicationContext(), "Iniciou a recolha de dados", Toast.LENGTH_LONG).show();
@@ -105,9 +106,6 @@ public class MainActivity extends AppCompatActivity {
     public void submitBtnClick(View view) {
         Toast.makeText(this, "Ficheiro submetido com sucesso!", Toast.LENGTH_SHORT).show();
     }
-
-
-
 }
 
 

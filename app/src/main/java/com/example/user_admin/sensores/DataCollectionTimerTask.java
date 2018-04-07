@@ -13,6 +13,7 @@ import static com.example.user_admin.sensores.MainActivity.SENSORSDATAFILENAME;
 public class DataCollectionTimerTask extends TimerTask {
 
     GPSTracker gps;
+    accelerometerTracker acc;
     FileManager fileManager;
     Permissions permissions;
     Utils utils;
@@ -29,6 +30,8 @@ public class DataCollectionTimerTask extends TimerTask {
 
         // create GPSTracker class object
         gps = new GPSTracker(mActivity);
+        acc = new accelerometerTracker (mActivity);
+
 
         // create Utils class object
         utils = new Utils(mActivity);
@@ -40,8 +43,12 @@ public class DataCollectionTimerTask extends TimerTask {
         double longitude = gps.getLongitude();
         double altitude = gps.getAltitude();
 
+        float accX = acc.getLastX();
+        float accY = acc.getLastY();
+        float accZ = acc.getLastZ();
+
         //store sensors data in internal storage file
-        fileManager.writeDataToFile(SENSORSDATAFILENAME, latitude + "," + longitude + "," + altitude + "," + utils.getCurrentDate("dd-MM-yy") + "," + utils.getCurrentTime("hh:mm:ss") + "\n");
+        fileManager.writeDataToFile(SENSORSDATAFILENAME, latitude + "," + longitude + "," + accX + "," + accY + "," + accZ + "," + altitude + "," + utils.getCurrentDate("dd-MM-yy") + "," + utils.getCurrentTime("hh:mm:ss") + "\n");
 
         mActivity.runOnUiThread(new Runnable(){
 

@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,13 +36,14 @@ public class MainActivity extends AppCompatActivity {
 
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
-    public static final int COLLECTIONTIMEINTERVAL = 125; // Collection time interval i.e 125 = 8 per sec
+    public static final int COLLECTIONTIMEINTERVAL = 5000; // Collection time interval i.e 125 = 8 per sec
     public static final int COLLECTIONTIMEDELAY= 0; // Collection time interval i.e 1000 = 1second
 
     //layout elements
     Button startBtn;
     Button stopBtn;
     TextView gpsTextView;
+    RadioGroup atividadesRadioGrp;
 
     Timer timer;
 
@@ -56,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
         permissions = new Permissions(MainActivity.this);
         permissions.checkLocationPermissions();
         permissions.checkInternetPermissions();
+
+        this.getSelectedActivity();
+
 
         //check external write permissions
         //permissions.checkWriteExternalStoragePermission();
@@ -116,6 +123,29 @@ public class MainActivity extends AppCompatActivity {
         t.start();
 
     }
+
+    private String getSelectedActivity() {
+
+        atividadesRadioGrp = (RadioGroup) findViewById(R.id.atividadesRadioGrp);
+        int index = atividadesRadioGrp.indexOfChild(findViewById(atividadesRadioGrp.getCheckedRadioButtonId()));
+
+        switch (index) {
+            case 0:
+                return "WALKING";
+            case 1:
+                return "RUNNING";
+            case 2:
+                return "GO_DOWNSTAIRS";
+            case 3:
+                return "GO_UPSTAIRS";
+            case 4:
+                return "DRIVING";
+            default:
+                return null;
+        }
+
+    }
+
 }
 
 

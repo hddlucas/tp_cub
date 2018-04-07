@@ -96,7 +96,7 @@
             android:id="@+id/descerRadioBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Descer"
+            android:text="Descer Escada"
             android:textColor="@color/textColorPrimary"
             android:textSize="16sp" />
 
@@ -104,16 +104,16 @@
             android:id="@+id/subirRadioBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Subir"
+            android:text="Subir Escada"
             android:textColor="@color/textColorPrimary"
             android:textSize="16sp"
             app:layout_constraintTop_toTopOf="parent" />
 
         <RadioButton
-            android:id="@+id/agacharRadioBtn"
+            android:id="@+id/conduzirRadioBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Agachar"
+            android:text="Conduzir"
             android:textColor="@color/textColorPrimary"
             android:textSize="16sp" />
 

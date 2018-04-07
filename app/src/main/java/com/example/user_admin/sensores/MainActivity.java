@@ -28,13 +28,13 @@ public class MainActivity extends AppCompatActivity {
 
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
-    public static final int COLLECTIONTIMEINTERVAL = 125; // Collection time interval i.e 5000 = 5seconds
+    public static final int COLLECTIONTIMEINTERVAL = 5000; // Collection time interval i.e 125 = 8 per sec
     public static final int COLLECTIONTIMEDELAY= 0; // Collection time interval i.e 1000 = 1second
 
     //layout elements
     Button startBtn;
     Button stopBtn;
-    TextView logsTxtBox;
+    TextView gpsTextView;
 
     Timer timer;
 
@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         //find elements on view
         startBtn = (Button) findViewById(R.id.startBtn);
         stopBtn = (Button) findViewById(R.id.stopBtn);
-        logsTxtBox = (TextView) findViewById(R.id.logsTxtBox);
 
         //check location permissions (run time permissions)
         permissions = new Permissions(MainActivity.this);

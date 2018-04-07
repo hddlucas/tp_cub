@@ -14,7 +14,7 @@ import static com.example.user_admin.sensores.MainActivity.SENSORSDATAFILENAME;
 public class DataCollectionTimerTask extends TimerTask {
 
     GPSTracker gps;
-    accelerometerTracker acc;
+    AccelerometerTracker acc;
     FileManager fileManager;
     Permissions permissions;
     Utils utils;
@@ -32,7 +32,7 @@ public class DataCollectionTimerTask extends TimerTask {
 
         // create GPSTracker class object
         gps = new GPSTracker(mActivity);
-        acc = new accelerometerTracker (mActivity);
+        acc = new AccelerometerTracker (mActivity);
 
 
         // create Utils class object

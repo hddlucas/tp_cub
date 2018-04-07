@@ -14,7 +14,7 @@ import android.widget.TextView;
  * Created by MarcoSequeira-PC on 06/04/2018.
  */
 
-public class accelerometerTracker implements SensorEventListener {
+public class AccelerometerTracker implements SensorEventListener {
 
     private float lastX, lastY, lastZ;
 
@@ -36,7 +36,7 @@ public class accelerometerTracker implements SensorEventListener {
 
     private Vibrator v;
 
-    public accelerometerTracker(Context context) {
+    public AccelerometerTracker(Context context) {
 
         this.mContext = context;
         this.lastX = 0;
@@ -98,6 +98,10 @@ public class accelerometerTracker implements SensorEventListener {
         lastZ = sensorEvent.values[2];
 
         vibrate();
+
+
+
+
     }
 
     @Override

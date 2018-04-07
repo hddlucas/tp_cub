@@ -1,11 +1,14 @@
 package com.example.user_admin.sensores;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,11 +20,12 @@ public class MainActivity extends AppCompatActivity {
 
     //Classes
     GPSTracker gps;
-    accelerometerTracker acc;
+    AccelerometerTracker acc;
     FileManager fileManager;
     Permissions permissions;
     Utils utils;
     DataCollectionTimerTask dataCollectionTimerTask;
+    SFTP sftp;
 
     //variables
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
@@ -29,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
-    public static final int COLLECTIONTIMEINTERVAL = 5000; // Collection time interval i.e 125 = 8 per sec
+    public static final int COLLECTIONTIMEINTERVAL = 125; // Collection time interval i.e 125 = 8 per sec
     public static final int COLLECTIONTIMEDELAY= 0; // Collection time interval i.e 1000 = 1second
 
     //layout elements
@@ -51,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         //check location permissions (run time permissions)
         permissions = new Permissions(MainActivity.this);
         permissions.checkLocationPermissions();
+        permissions.checkInternetPermissions();
 
         //check external write permissions
         //permissions.checkWriteExternalStoragePermission();
@@ -66,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View arg0) {
                 gps = new GPSTracker(MainActivity.this);
-                acc = new accelerometerTracker(MainActivity.this);
+                acc = new AccelerometerTracker(MainActivity.this);
 
                 if(gps.canGetLocation) {
                     Toast.makeText(getApplicationContext(), "Iniciou a recolha de dados", Toast.LENGTH_LONG).show();
@@ -103,7 +108,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void submitBtnClick(View view) {
-        Toast.makeText(this, "Ficheiro submetido com sucesso!", Toast.LENGTH_SHORT).show();
+
+        Runnable sftp = new SFTP(MainActivity.this);
+
+        Thread t = new Thread(sftp);
+        t.setDaemon(true);
+        t.start();
+
     }
 }
 

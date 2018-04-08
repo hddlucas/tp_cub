@@ -35,7 +35,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     private SensorManager sensorManager;
 
     //variables
-    public static Float[] sensorsData = new Float[12];
+    public static Float[] sensorsData = new Float[13];
 
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
@@ -244,6 +244,10 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     sensorsData[9] = event.values[0];
                     sensorsData[10] = event.values[1];
                     sensorsData[11] = event.values[2];
+                    break;
+                case Sensor.TYPE_LIGHT:
+                    sensorsData[12] = event.values[0];
+
                     break;
 
                 default:

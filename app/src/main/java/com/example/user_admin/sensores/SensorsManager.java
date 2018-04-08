@@ -57,6 +57,7 @@ public class SensorsManager <T extends LocationListener & SensorEventListener> {
             sensorManager.registerListener(this.listener, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
             sensorManager.registerListener(this.listener, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
             sensorManager.registerListener(this.listener, gravity, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener(this.listener, illuminance, SensorManager.SENSOR_DELAY_FASTEST);
 
 
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000,

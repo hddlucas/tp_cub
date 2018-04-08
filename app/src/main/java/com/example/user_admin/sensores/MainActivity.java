@@ -1,12 +1,15 @@
 package com.example.user_admin.sensores;
 
 import android.app.Activity;
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +17,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Timer;
 
@@ -33,11 +37,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     private SensorManager sensorManager;
 
     //variables
-    private static Float[] sensorsData = new Float[13];
+    public static Float[] sensorsData = new Float[12];
 
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
-    public static final int COLLECTIONTIMEINTERVAL = 5000; // Collection time interval i.e 125 = 8 per sec
+    public static final int COLLECTIONTIMEINTERVAL = 500; // Collection time interval i.e 125 = 8 per sec
     public static final int COLLECTIONTIMEDELAY = 0; // Collection time interval i.e 1000 = 1second
 
     //layout elements
@@ -71,7 +75,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         //check location permissions (run time permissions)
         permissions = new Permissions(MainActivity.this);
         permissions.checkLocationPermissions();
-        permissions.checkInternetPermissions();
         //permissions.checkWriteExternalStoragePermission();
 
         // create FileManager class object
@@ -92,35 +95,29 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     //this method will start sensors data collect
     public void startCollectSensorsDataBtn(View v) {
         gps = new GPSTracker(MainActivity.this);
-        if(gps.canGetLocation) {
+        if (gps.canGetLocation) {
             disableActivities();
             sensorsManager.startSensors(MainActivity.this);
             startBtn.setEnabled(false);
             stopBtn.setEnabled(true);
             submitBtn.setEnabled(false);
-            Toast.makeText(getApplicationContext(), "Iniciou a recolha de dados", Toast.LENGTH_LONG).show();
-        }
-        else{
+            Utils.showToast(getApplicationContext(), "Iniciou a recolha de dados");
+
+            if (timer != null) {
+                timer.cancel();
+            }
+
+            timer = new Timer();
+            dataCollectionTimerTask = new DataCollectionTimerTask(MainActivity.this, sensorsData);
+
+            //schedule task
+            timer.schedule(dataCollectionTimerTask, COLLECTIONTIMEDELAY, COLLECTIONTIMEINTERVAL);
+
+
+        } else {
             gps.showSettingsAlert();
         }
 
-               /* if(gps.canGetLocation) {
-                    Toast.makeText(getApplicationContext(), "Iniciou a recolha de dados", Toast.LENGTH_LONG).show();
-
-                  *//*  if (timer != null) {
-                        timer.cancel();
-                    }
-
-                    timer = new Timer();
-                    dataCollectionTimerTask = new DataCollectionTimerTask(MainActivity.this);
-
-                    //schedule task
-                    timer.schedule(dataCollectionTimerTask, COLLECTIONTIMEDELAY, COLLECTIONTIMEINTERVAL);*//*
-
-                }
-                else{
-                    gps.showSettingsAlert();
-                }*/
     }
 
     //this method will stop sensors data collect
@@ -131,22 +128,41 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         submitBtn.setEnabled(true);
         sensorsManager.stopSensors();
 
-        Toast.makeText(getApplicationContext(), "Pausou a recolha de dados", Toast.LENGTH_LONG).show();
+        Utils.showToast(getApplicationContext(), "Pausou a recolha de dados");
 
-      /*  if (timer != null) {
+        if (timer != null) {
             timer.cancel();
             timer = null;
-        }*/
+        }
 
-        logsTxtBox.setText("oi");
     }
 
     //this function is used to upload file via sftp server.
     public void submitBtnClick(View view) {
-        Runnable sftp = new SFTP(MainActivity.this);
-        Thread t = new Thread(sftp);
-        t.setDaemon(true);
-        t.start();
+        if(isNetworkAvailable()) {
+            File file = new File(this.getFilesDir() + "/" + SENSORSDATAFILENAME);
+            if (file.exists()) {
+
+                Runnable sftp = new SFTP(MainActivity.this,file);
+                Thread t = new Thread(sftp);
+                t.setDaemon(true);
+                t.start();
+            }
+            else{
+                Utils.showToast(getApplicationContext(), "O ficheiro não existe!");
+            }
+        }
+        else{
+            permissions.checkInternetPermissions();
+            Utils.showToast(getApplicationContext(), "Sem acesso á internet!");
+        }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     @Override
@@ -156,10 +172,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         startBtn.setEnabled(true);
         stopBtn.setEnabled(false);
         submitBtn.setEnabled(true);
-
         sensorsManager.stopSensors();
     }
-
 
 
     //this method is used to get current activity selected
@@ -186,7 +200,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         for (int i = 0; i < atividadesRadioGrp.getChildCount(); i++) {
             atividadesRadioGrp.getChildAt(i).setEnabled(true);
         }
-
     }
 
     //User can't select another activity while collection sensors data
@@ -196,56 +209,65 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         }
     }
 
-
     @Override
     public void onLocationChanged(Location location) {
         synchronized (sensorsData) {
             gpsTextView.setText("GPS: " + location.getLatitude() + " , " + location.getLongitude());
+            sensorsData[0] = (float)location.getLatitude();
+            sensorsData[1] = (float)location.getLongitude();
+            sensorsData[2] = (float)location.getAltitude();
 
             String activity = getSelectedActivity();
             if (activity == null) return;
 
             //confirm if all values are completed
-           /* for (int i = 0; i < sensorsData.length; i++) {
+            for (int i = 0; i < sensorsData.length; i++) {
                 if (sensorsData[i] == null) {
                     return;
                 }
-            }*/
-
+            }
             long timestamp = Calendar.getInstance().getTimeInMillis();
-
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-
-
         synchronized (sensorsData) {
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-//                sensorsData[3] = event.values[0];
-//                sensorsData[4] = event.values[1];
-//                sensorsData[5] = event.values[2];
+            switch (event.sensor.getType()) {
+                case Sensor.TYPE_ACCELEROMETER:
+                    sensorsData[3] = event.values[0];
+                    sensorsData[4] = event.values[1];
+                    sensorsData[5] = event.values[2];
+                    //acelerometroTextView.setText("X: " + event.values[0] + " Y: " + event.values[1] + " Z: " + event.values[2]);
+                    break;
 
-                acelerometroTextView.setText("X: " + event.values[0] + " Y: " + event.values[1] + " Z: " + event.values[2]);
-                logsTxtBox.setText(event.values[0] +","+ event.values[1] + "," + event.values[2]);
+                case Sensor.TYPE_GYROSCOPE:
+                    sensorsData[6] = event.values[0];
+                    sensorsData[7] = event.values[1];
+                    sensorsData[8] = event.values[2];
 
-            } else {
-                return;
+                case Sensor.TYPE_GRAVITY:
+                    sensorsData[9] = event.values[0];
+                    sensorsData[10] = event.values[1];
+                    sensorsData[11] = event.values[2];
+                    break;
+                    
+                default:
+                    return;
             }
 
             String activity = getSelectedActivity();
             if (activity == null) return;
 
             //confirm if all values are completed
-           /* for (int i = 0; i < sensorsData.length; i++) {
+           for (int i = 0; i < sensorsData.length; i++) {
                 if (sensorsData[i] == null) {
                     return;
                 }
-            }*/
+            }
 
+            dataCollectionTimerTask = new DataCollectionTimerTask(MainActivity.this, sensorsData);
             long timestamp = Calendar.getInstance().getTimeInMillis();
-
         }
     }
 

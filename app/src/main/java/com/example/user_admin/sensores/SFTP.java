@@ -19,9 +19,11 @@ public class SFTP implements Runnable {
 
     private Context context;
     FileManager fileManager;
+    File file;
 
-    public SFTP(Context context) {
+    public SFTP(Context context, File file) {
         this.context = context;
+        this.file = file;
     }
 
 
@@ -31,49 +33,41 @@ public class SFTP implements Runnable {
     public void run() {
         try {
 
-            File file = new File(context.getFilesDir() + "/" + SENSORSDATAFILENAME);
+            JSch ssh = new JSch();
+            Session session = ssh.getSession("cubistudent", "urbysense.dei.uc.pt", 22);
+            // Remember that this is just for testing and we need a quick access, you can add an identity and known_hosts file to prevent
+            // Man In the Middle attacks
+            java.util.Properties config = new java.util.Properties();
+            config.put("StrictHostKeyChecking", "no");
+            session.setConfig(config);
+            session.setPassword("mis_cubi_2018");
 
-            if (file.exists()) {
+            session.connect();
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
 
-                JSch ssh = new JSch();
-                Session session = ssh.getSession("cubistudent", "urbysense.dei.uc.pt", 22);
-                // Remember that this is just for testing and we need a quick access, you can add an identity and known_hosts file to prevent
-                // Man In the Middle attacks
-                java.util.Properties config = new java.util.Properties();
-                config.put("StrictHostKeyChecking", "no");
-                session.setConfig(config);
-                session.setPassword("mis_cubi_2018");
+            ChannelSftp sftp = (ChannelSftp) channel;
 
-                session.connect();
-                Channel channel = session.openChannel("sftp");
-                channel.connect();
+            sftp.cd("a21220082_a21230131");
+            // If you need to display the progress of the upload, read how to do it in the end of the article
 
-                ChannelSftp sftp = (ChannelSftp) channel;
+            // use the put method , if you are using android remember to remove "file://" and use only the relative path
+            long timestamp = Calendar.getInstance().getTimeInMillis();
 
-                sftp.cd("a21220082_a21230131");
-                // If you need to display the progress of the upload, read how to do it in the end of the article
+            sftp.put(file.getPath() + "", "sensors_" + timestamp);
 
-                // use the put method , if you are using android remember to remove "file://" and use only the relative path
-                long timestamp = Calendar.getInstance().getTimeInMillis();
+            Boolean success = true;
 
-                sftp.put(file.getPath() + "", "sensors_" + timestamp);
+            if (success) {
+                fileManager = new FileManager(context);
+                fileManager.deleteFile(SENSORSDATAFILENAME);
 
-                Boolean success = true;
-
-                if (success) {
-                    Toast.makeText(context, "Ficheiro submetido com sucesso!", Toast.LENGTH_SHORT).show();
-                    fileManager = new FileManager(context);
-                    fileManager.deleteFile(SENSORSDATAFILENAME);
-
-                } else {
-                    Toast.makeText(context, "Ocorreu um problema ao transferir o ficheiro!!", Toast.LENGTH_SHORT).show();
-                }
-
-                channel.disconnect();
-                session.disconnect();
             } else {
-                Toast.makeText(context, "O ficheiro não existe!", Toast.LENGTH_SHORT).show();
             }
+
+            channel.disconnect();
+            session.disconnect();
+
 
         } catch (JSchException e) {
             System.out.println(e.getMessage().toString());

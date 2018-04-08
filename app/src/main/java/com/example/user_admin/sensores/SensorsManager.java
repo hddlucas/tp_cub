@@ -55,6 +55,9 @@ public class SensorsManager <T extends LocationListener & SensorEventListener> {
         if (sensorManager != null && gravity != null && accelerometer != null && illuminance != null && gyroscope != null) {
             this.listener = listener;
             sensorManager.registerListener(this.listener, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener(this.listener, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener(this.listener, gravity, SensorManager.SENSOR_DELAY_FASTEST);
+
 
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000,
                     10, this.listener);

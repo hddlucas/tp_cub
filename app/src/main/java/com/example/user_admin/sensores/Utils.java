@@ -1,6 +1,7 @@
 package com.example.user_admin.sensores;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -34,5 +35,9 @@ public class Utils {
         String currentTime = df.format(c);
 
         return currentTime;
+    }
+
+    public static void showToast(Context mContext,String message){
+        Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
     }
 }

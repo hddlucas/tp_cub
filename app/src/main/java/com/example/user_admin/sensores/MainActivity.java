@@ -29,10 +29,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     FileManager fileManager;
     Permissions permissions;
     Utils utils;
-    DataCollectionTimerTask dataCollectionTimerTask;
     SFTP sftp;
     SensorsManager<MainActivity> sensorsManager;
-
 
     private SensorManager sensorManager;
 
@@ -51,10 +49,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     TextView gpsTextView;
     TextView acelerometroTextView;
     TextView logsTxtBox;
-
     RadioGroup atividadesRadioGrp;
 
-    Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,24 +91,20 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     //this method will start sensors data collect
     public void startCollectSensorsDataBtn(View v) {
         gps = new GPSTracker(MainActivity.this);
+        utils = new Utils(MainActivity.this);
+
         if (gps.canGetLocation) {
             disableActivities();
-            sensorsManager.startSensors(MainActivity.this);
             startBtn.setEnabled(false);
             stopBtn.setEnabled(true);
             submitBtn.setEnabled(false);
+
+            //create new file to store sensors data, if doesn't exists
+            fileManager.createFile(this.getFilesDir() + "/" + SENSORSDATAFILENAME);
+
+            //start sensors
+            sensorsManager.startSensors(MainActivity.this);
             Utils.showToast(getApplicationContext(), "Iniciou a recolha de dados");
-
-            if (timer != null) {
-                timer.cancel();
-            }
-
-            timer = new Timer();
-            dataCollectionTimerTask = new DataCollectionTimerTask(MainActivity.this, sensorsData);
-
-            //schedule task
-            timer.schedule(dataCollectionTimerTask, COLLECTIONTIMEDELAY, COLLECTIONTIMEINTERVAL);
-
 
         } else {
             gps.showSettingsAlert();
@@ -130,31 +122,31 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
         Utils.showToast(getApplicationContext(), "Pausou a recolha de dados");
 
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-
     }
 
     //this function is used to upload file via sftp server.
     public void submitBtnClick(View view) {
-        if(isNetworkAvailable()) {
-            File file = new File(this.getFilesDir() + "/" + SENSORSDATAFILENAME);
-            if (file.exists()) {
+        try {
+            if (isNetworkAvailable()) {
+                File file = new File(this.getFilesDir() + "/" + SENSORSDATAFILENAME);
+                if (file.exists()) {
 
-                Runnable sftp = new SFTP(MainActivity.this,file);
-                Thread t = new Thread(sftp);
-                t.setDaemon(true);
-                t.start();
+                    Runnable sftp = new SFTP(MainActivity.this, file);
+                    Thread t = new Thread(sftp);
+                    t.setDaemon(true);
+                    t.start();
+
+                    Utils.showToast(getApplicationContext(), "Ficheiro transferido com sucesso");
+
+                } else {
+                    Utils.showToast(getApplicationContext(), "O ficheiro não existe!");
+                }
+            } else {
+                permissions.checkInternetPermissions();
+                Utils.showToast(getApplicationContext(), "Sem acesso á internet!");
             }
-            else{
-                Utils.showToast(getApplicationContext(), "O ficheiro não existe!");
-            }
-        }
-        else{
-            permissions.checkInternetPermissions();
-            Utils.showToast(getApplicationContext(), "Sem acesso á internet!");
+        }catch (Exception ex){
+            Utils.showToast(getApplicationContext(), "Ocorreu um problema ao transferir o ficheiro");
         }
     }
 
@@ -181,9 +173,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         int index = atividadesRadioGrp.indexOfChild(findViewById(atividadesRadioGrp.getCheckedRadioButtonId()));
         switch (index) {
             case 0:
-                return "WALKING";
-            case 1:
                 return "RUNNING";
+            case 1:
+                return "WALKING";
             case 2:
                 return "GO_DOWNSTAIRS";
             case 3:
@@ -226,7 +218,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     return;
                 }
             }
+
             long timestamp = Calendar.getInstance().getTimeInMillis();
+            fileManager.writeDataToFile(SENSORSDATAFILENAME,sensorsData,timestamp,getSelectedActivity());
         }
     }
 
@@ -238,7 +232,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     sensorsData[3] = event.values[0];
                     sensorsData[4] = event.values[1];
                     sensorsData[5] = event.values[2];
-                    //acelerometroTextView.setText("X: " + event.values[0] + " Y: " + event.values[1] + " Z: " + event.values[2]);
+                    acelerometroTextView.setText("X: " + event.values[0] + " Y: " + event.values[1] + " Z: " + event.values[2]);
                     break;
 
                 case Sensor.TYPE_GYROSCOPE:
@@ -251,7 +245,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     sensorsData[10] = event.values[1];
                     sensorsData[11] = event.values[2];
                     break;
-                    
+
                 default:
                     return;
             }
@@ -265,9 +259,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     return;
                 }
             }
-
-            dataCollectionTimerTask = new DataCollectionTimerTask(MainActivity.this, sensorsData);
             long timestamp = Calendar.getInstance().getTimeInMillis();
+            fileManager.writeDataToFile(SENSORSDATAFILENAME,sensorsData,timestamp,getSelectedActivity());
         }
     }
 

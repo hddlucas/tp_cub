@@ -76,6 +76,5 @@ public class SFTP implements Runnable {
             System.out.println(e.getMessage().toString());
             e.printStackTrace();
         }
-
     }
 }

@@ -21,6 +21,11 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Timer;
 
+import static android.util.Half.EPSILON;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.StrictMath.sqrt;
+
 public class MainActivity extends Activity implements LocationListener, SensorEventListener {
 
     //Classes
@@ -32,10 +37,20 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     SFTP sftp;
     SensorsManager<MainActivity> sensorsManager;
 
+    private float lastX, lastY, lastZ;
+
+    private float deltaXMax = 0;
+    private float deltaYMax = 0;
+    private float deltaZMax = 0;
+    private float timestamp;
+    private final float[] deltaRotationVector = new float[4];
+
+
     private SensorManager sensorManager;
 
     //variables
     public static Float[] sensorsData = new Float[13];
+    private static final float NS2S = 1.0f / 1000000000.0f;
 
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
@@ -239,6 +254,38 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         synchronized (sensorsData) {
             switch (event.sensor.getType()) {
                 case Sensor.TYPE_ACCELEROMETER:
+
+                    // get the change of the x,y,z values of the accelerometer
+                    float deltaX = Math.abs(lastX - event.values[0]);
+                    float deltaY = Math.abs(lastY - event.values[1]);
+                    float deltaZ = Math.abs(lastZ - event.values[2]);
+
+                    // if the change is below 2, it is just plain noise
+                    if (deltaX < 2)
+                        deltaX = 0;
+                    if (deltaY < 2)
+                        deltaY = 0;
+
+
+
+                    // get the change of the x,y,z values of the accelerometer
+                    deltaX = Math.abs(lastX - event.values[0]);
+                    deltaY = Math.abs(lastY - event.values[1]);
+                    deltaZ = Math.abs(lastZ - event.values[2]);
+
+                    // if the change is below 2, it is just plain noise
+                    if (deltaX < 2)
+                        deltaX = 0;
+                    if (deltaY < 2)
+                        deltaY = 0;
+                    if (deltaZ < 2)
+                        deltaZ = 0;
+
+                    // set the last know values of x,y,z
+                    lastX = event.values[0];
+                    lastY = event.values[1];
+                    lastZ = event.values[2];
+
                     sensorsData[3] = event.values[0];
                     sensorsData[4] = event.values[1];
                     sensorsData[5] = event.values[2];
@@ -246,6 +293,46 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     break;
 
                 case Sensor.TYPE_GYROSCOPE:
+                    // This timestep's delta rotation to be multiplied by the current rotation
+                    // after computing it from the gyro sample data.
+                    if (timestamp != 0) {
+                        final float dT = (event.timestamp - timestamp) * NS2S;
+                        // Axis of the rotation sample, not normalized yet.
+                        float axisX = event.values[0];
+                        float axisY = event.values[1];
+                        float axisZ = event.values[2];
+
+                        // Calculate the angular speed of the sample
+                        float omegaMagnitude = (float) sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ);
+
+                        // Normalize the rotation vector if it's big enough to get the axis
+                        // (that is, EPSILON should represent your maximum allowable margin of error)
+                        if (omegaMagnitude > EPSILON) {
+                            axisX /= omegaMagnitude;
+                            axisY /= omegaMagnitude;
+                            axisZ /= omegaMagnitude;
+                        }
+
+                        // Integrate around this axis with the angular speed by the timestep
+                        // in order to get a delta rotation from this sample over the timestep
+                        // We will convert this axis-angle representation of the delta rotation
+                        // into a quaternion before turning it into the rotation matrix.
+                        float thetaOverTwo = omegaMagnitude * dT / 2.0f;
+                        float sinThetaOverTwo = (float) sin(thetaOverTwo);
+                        float cosThetaOverTwo = (float) cos(thetaOverTwo);
+                        deltaRotationVector[0] = sinThetaOverTwo * axisX;
+                        deltaRotationVector[1] = sinThetaOverTwo * axisY;
+                        deltaRotationVector[2] = sinThetaOverTwo * axisZ;
+                        deltaRotationVector[3] = cosThetaOverTwo;
+                    }
+
+                    timestamp = event.timestamp;
+                    float[] deltaRotationMatrix = new float[9];
+                    SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
+                    // User code should concatenate the delta rotation we computed with the current rotation
+                    // in order to get the updated rotation.
+                    // rotationCurrent = rotationCurrent * deltaRotationMatrix;
+
                     sensorsData[6] = event.values[0];
                     sensorsData[7] = event.values[1];
                     sensorsData[8] = event.values[2];

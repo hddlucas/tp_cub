@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         // create FileManager class object
         fileManager = new FileManager(MainActivity.this);
         // delete file (only for test , this shoud be removed later)
-        //fileManager.deleteFile(SENSORSDATAFILENAME);
+        fileManager.deleteFile(SENSORSDATAFILENAME);
 
 
         logsTxtBox.setText("Lista de Sensores:\n\n" +

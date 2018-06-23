@@ -15,14 +15,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Timer;
 
 import static android.util.Half.EPSILON;
 import static java.lang.Math.cos;
@@ -386,17 +384,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
         try {
             FileManager csvReader = new FileManager(this.getApplicationContext());
-            rows = csvReader.readCSV("sensors_1529358321032.csv");
+            rows = csvReader.readCSV("treino.csv");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        for (int i = 0; i < 10; i++) {
-            System.out.print(String.format("row %s: %s, %s", i, rows.get(i)[0], rows.get(i)[1]));
-        }
-
-        int N = 256;
+        //int N = rows.size();
+        int N = 64;
 
         FFT fft = new FFT(N);
 
@@ -404,13 +399,51 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         double[] re = new double[N];
         double[] im = new double[N];
 
+        double x_acc, y_acc, z_acc, acc_sqrt;
         // Ramp
-        for (int i = 0; i < N; i++) {
-            re[i] = i;
-            im[i] = 0;
-        }
+        for (int j=0; j < N; j++) {
+            x_acc = Math.pow(Double.parseDouble(rows.get(j)[4]), 2);
+            y_acc = Math.pow(Double.parseDouble(rows.get(j)[5]), 2);
+            z_acc = Math.pow(Double.parseDouble(rows.get(j)[6]), 2);
+            acc_sqrt = Math.sqrt(x_acc + y_acc + z_acc);
 
+            re[j] = acc_sqrt;
+            im[j] = 0;
+        }
         fft.beforeAfter(fft, re, im);
+
+
+
+        /*for (int j=0; j < rows.size(); j++) {
+            if(j < N) {
+                x_acc = Math.pow(Double.parseDouble(rows.get(j)[4]), 2);
+                y_acc = Math.pow(Double.parseDouble(rows.get(j)[5]), 2);
+                z_acc = Math.pow(Double.parseDouble(rows.get(j)[6]), 2);
+                acc_sqrt = Math.sqrt(x_acc + y_acc + z_acc);
+
+                re[j] = acc_sqrt;
+                im[j] = 0;
+            }
+
+            if(j == N) {
+                fft.beforeAfter(fft, re, im);
+            }
+
+            if((j+N) <= rows.size() && j > N) {
+                for (int i = j; i < (j + N); i++) {
+                    x_acc = Math.pow(Double.parseDouble(rows.get(j)[4]), 2);
+                    y_acc = Math.pow(Double.parseDouble(rows.get(j)[5]), 2);
+                    z_acc = Math.pow(Double.parseDouble(rows.get(j)[6]), 2);
+                    acc_sqrt = Math.sqrt(x_acc + y_acc + z_acc);
+
+                    re[i] = acc_sqrt;
+                    im[i] = 0;
+                    fft.beforeAfter(fft, re, im);
+                }
+            }
+        }*/
+
+
 
         long time = System.currentTimeMillis();
         double iter = 30000;

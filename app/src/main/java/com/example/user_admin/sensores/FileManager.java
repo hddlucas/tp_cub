@@ -110,7 +110,7 @@ public class FileManager {
         InputStreamReader isr = new InputStreamReader(is);
         BufferedReader br = new BufferedReader(isr);
         String line;
-        String csvSplitBy = ",";
+        String csvSplitBy = ";";
 
         br.readLine();
 

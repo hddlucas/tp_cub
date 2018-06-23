@@ -18,7 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Timer;
 
 import static android.util.Half.EPSILON;
@@ -38,13 +41,10 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     SensorsManager<MainActivity> sensorsManager;
 
     private float lastX, lastY, lastZ;
-
     private float deltaXMax = 0;
-    private float deltaYMax = 0;
     private float deltaZMax = 0;
     private float timestamp;
     private final float[] deltaRotationVector = new float[4];
-
 
     private SensorManager sensorManager;
 
@@ -66,11 +66,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     TextView logsTxtBox;
     RadioGroup atividadesRadioGrp;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //only for test
+        generateFourierTransform();
 
         //find elements on view
         startBtn = (Button) findViewById(R.id.startBtn);
@@ -93,7 +95,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         // delete file (only for test , this shoud be removed later)
         fileManager.deleteFile(SENSORSDATAFILENAME);
 
-
         logsTxtBox.setText("Lista de Sensores:\n\n" +
                 "GPS" + "\n" +
                 "Acelerómetro" + "\n" +
@@ -102,15 +103,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 "Giroscópio" + "\n"
 
         );
-
-
         try {
             sensorsManager = SensorsManager.getInstance(this);
         } catch (NullPointerException ex) {
             ex.printStackTrace();
             finish();
         }
-
     }
 
     //this method will start sensors data collect
@@ -136,7 +134,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         }
 
     }
-
     //this method will stop sensors data collect
     public void stopCollectSensorsDataBtn(View v) {
         enableActivities();
@@ -191,7 +188,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         submitBtn.setEnabled(true);
         sensorsManager.stopSensors();
     }
-
 
     //this method is used to get current activity selected
     private String getSelectedActivity() {
@@ -384,6 +380,49 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     public void onProviderDisabled(String s) {
 
     }
+
+    private void generateFourierTransform() {
+        List<String[]> rows = new ArrayList<>();
+
+        try {
+            FileManager csvReader = new FileManager(this.getApplicationContext());
+            rows = csvReader.readCSV("sensors_1529358321032.csv");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for (int i = 0; i < 10; i++) {
+            System.out.print(String.format("row %s: %s, %s", i, rows.get(i)[0], rows.get(i)[1]));
+        }
+
+        int N = 256;
+
+        FFT fft = new FFT(N);
+
+        double[] window = fft.getWindow();
+        double[] re = new double[N];
+        double[] im = new double[N];
+
+        // Ramp
+        for (int i = 0; i < N; i++) {
+            re[i] = i;
+            im[i] = 0;
+        }
+
+        fft.beforeAfter(fft, re, im);
+
+        long time = System.currentTimeMillis();
+        double iter = 30000;
+        for (int i = 0; i < iter; i++)
+            fft.fft(re, im);
+        time = System.currentTimeMillis() - time;
+        System.out.println("Averaged " + (time / iter) + "ms per iteration");
+
+    }
+
+
+
 }
 
 

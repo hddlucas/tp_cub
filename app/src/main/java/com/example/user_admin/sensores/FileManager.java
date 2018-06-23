@@ -8,7 +8,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -17,7 +20,7 @@ import java.io.InputStreamReader;
 
 public class FileManager {
 
-    private Context context;
+    public Context context;
 
     public FileManager(Context context) {
         this.context = context;
@@ -99,6 +102,23 @@ public class FileManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public  List<String[]> readCSV(String fileName) throws IOException {
+        List<String[]> rows = new ArrayList<>();
+        InputStream is = context.getAssets().open(fileName);
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr);
+        String line;
+        String csvSplitBy = ",";
+
+        br.readLine();
+
+        while ((line = br.readLine()) != null) {
+            String[] row = line.split(csvSplitBy);
+            rows.add(row);
+        }
+        return rows;
     }
 
 }

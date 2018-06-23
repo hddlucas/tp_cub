@@ -40,4 +40,10 @@ public class Utils {
     public static void showToast(Context mContext,String message){
         Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
     }
+
+    //this method is used to gcalculate angular velocity
+    public double calculateAngularVelocity(double x, double y, double z){
+        return  Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+    }
+
 }

@@ -28,7 +28,6 @@ import static java.lang.Math.sin;
 import static java.lang.StrictMath.sqrt;
 
 public class MainActivity extends Activity implements LocationListener, SensorEventListener {
-
     //Classes
     GPSTracker gps;
     AccelerometerTracker acc;
@@ -43,7 +42,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     private float deltaZMax = 0;
     private float timestamp;
     private final float[] deltaRotationVector = new float[4];
-
     private SensorManager sensorManager;
 
     //variables
@@ -99,7 +97,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 "Luminosidade" + "\n" +
                 "Gravidade" + "\n" +
                 "Giroscópio" + "\n"
-
         );
         try {
             sensorsManager = SensorsManager.getInstance(this);
@@ -130,7 +127,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         } else {
             gps.showSettingsAlert();
         }
-
     }
     //this method will stop sensors data collect
     public void stopCollectSensorsDataBtn(View v) {
@@ -141,7 +137,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         sensorsManager.stopSensors();
 
         Utils.showToast(getApplicationContext(), "Pausou a recolha de dados");
-
     }
 
     //this function is used to upload file via sftp server.
@@ -237,7 +232,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     return;
                 }
             }
-
             long timestamp = Calendar.getInstance().getTimeInMillis();
             fileManager.writeDataToFile(SENSORSDATAFILENAME,sensorsData,timestamp,getSelectedActivity());
         }
@@ -259,8 +253,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                         deltaX = 0;
                     if (deltaY < 2)
                         deltaY = 0;
-
-
 
                     // get the change of the x,y,z values of the accelerometer
                     deltaX = Math.abs(lastX - event.values[0]);
@@ -380,6 +372,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     }
 
     private void generateFourierTransform() {
+        utils = new Utils(MainActivity.this);
+
         List<String[]> rows = new ArrayList<>();
 
         try {
@@ -399,20 +393,16 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         double[] re = new double[N];
         double[] im = new double[N];
 
-        double x_acc, y_acc, z_acc, acc_sqrt;
+        double acc_sqrt;
         // Ramp
         for (int j=0; j < N; j++) {
-            x_acc = Math.pow(Double.parseDouble(rows.get(j)[4]), 2);
-            y_acc = Math.pow(Double.parseDouble(rows.get(j)[5]), 2);
-            z_acc = Math.pow(Double.parseDouble(rows.get(j)[6]), 2);
-            acc_sqrt = Math.sqrt(x_acc + y_acc + z_acc);
+            acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]),Double.parseDouble(rows.get(j)[5]),Double.parseDouble(rows.get(j)[6]));
 
             re[j] = acc_sqrt;
             im[j] = 0;
         }
+
         fft.beforeAfter(fft, re, im);
-
-
 
         /*for (int j=0; j < rows.size(); j++) {
             if(j < N) {
@@ -442,7 +432,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 }
             }
         }*/
-
 
 
         long time = System.currentTimeMillis();

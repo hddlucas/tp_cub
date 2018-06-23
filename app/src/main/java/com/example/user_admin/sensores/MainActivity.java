@@ -384,7 +384,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             e.printStackTrace();
         }
 
-        //int N = rows.size();
         int N = 64;
 
         FFT fft = new FFT(N);
@@ -394,44 +393,23 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         double[] im = new double[N];
 
         double acc_sqrt;
-        // Ramp
-        for (int j=0; j < N; j++) {
-            acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]),Double.parseDouble(rows.get(j)[5]),Double.parseDouble(rows.get(j)[6]));
-
-            re[j] = acc_sqrt;
-            im[j] = 0;
-        }
-
-        fft.beforeAfter(fft, re, im);
-
-        /*for (int j=0; j < rows.size(); j++) {
-            if(j < N) {
-                x_acc = Math.pow(Double.parseDouble(rows.get(j)[4]), 2);
-                y_acc = Math.pow(Double.parseDouble(rows.get(j)[5]), 2);
-                z_acc = Math.pow(Double.parseDouble(rows.get(j)[6]), 2);
-                acc_sqrt = Math.sqrt(x_acc + y_acc + z_acc);
-
-                re[j] = acc_sqrt;
-                im[j] = 0;
-            }
-
-            if(j == N) {
+        ArrayList reals = new ArrayList<Double>();
+        int aux=0;
+        for (int j=0; j < rows.size(); j++) {
+            if(j!=0 && j % N == 0) {
                 fft.beforeAfter(fft, re, im);
-            }
-
-            if((j+N) <= rows.size() && j > N) {
-                for (int i = j; i < (j + N); i++) {
-                    x_acc = Math.pow(Double.parseDouble(rows.get(j)[4]), 2);
-                    y_acc = Math.pow(Double.parseDouble(rows.get(j)[5]), 2);
-                    z_acc = Math.pow(Double.parseDouble(rows.get(j)[6]), 2);
-                    acc_sqrt = Math.sqrt(x_acc + y_acc + z_acc);
-
-                    re[i] = acc_sqrt;
-                    im[i] = 0;
-                    fft.beforeAfter(fft, re, im);
+                for (int k=0; k < re.length; k++) {
+                    reals.add(re[k]);
                 }
+                aux=0;
+                re = new double[N];
+                im = new double[N];
             }
-        }*/
+            acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]),Double.parseDouble(rows.get(j)[5]),Double.parseDouble(rows.get(j)[6]));
+            re[aux] = acc_sqrt;
+            im[aux] = 0;
+            aux++;
+        }
 
 
         long time = System.currentTimeMillis();

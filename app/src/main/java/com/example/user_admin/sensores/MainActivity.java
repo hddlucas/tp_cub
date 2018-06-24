@@ -33,6 +33,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     AccelerometerTracker acc;
     FileManager fileManager;
     Permissions permissions;
+    Complex complex;
     Utils utils;
     SFTP sftp;
     SensorsManager<MainActivity> sensorsManager;
@@ -385,49 +386,200 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         }
 
         int N = 64;
-
         FFT fft = new FFT(N);
-
         double[] window = fft.getWindow();
-        double[] re = new double[N];
-        double[] im = new double[N];
+
+        //acc
+        double[] re_acc = new double[N];
+        double[] im_acc = new double[N];
+
+        //gyro
+        double[] re_gyro = new double[N];
+        double[] im_gyro = new double[N];
+
+        //grav
+        double[] re_grav = new double[N];
+        double[] im_grav = new double[N];
+
         String fft_complex="";
 
-        double acc_sqrt;
+        double acc_sqrt,gyro_sqrt,grav_sqrt;
+
         ArrayList fft_complex_array = new ArrayList<String>();
+        List<List<String>> list = new ArrayList<List<String>>();
+        List<String> timestamp = new ArrayList<String>();
+
+        List<String> data_acc = new ArrayList<String>();
+        List<String> fft_freq_acc = new ArrayList<String>();
+        List<String> serie_acc = new ArrayList<String>();
+        List<String> fft_mag_acc = new ArrayList<String>();
+        List<String> fft_complex_acc = new ArrayList<String>();
+
+        List<String> data_gyro = new ArrayList<String>();
+        List<String> fft_freq_gyro = new ArrayList<String>();
+        List<String> serie_gyro = new ArrayList<String>();
+        List<String> fft_mag_gyro = new ArrayList<String>();
+        List<String> fft_complex_gyro = new ArrayList<String>();
+
+        List<String> data_grav = new ArrayList<String>();
+        List<String> fft_freq_grav = new ArrayList<String>();
+        List<String> serie_grav = new ArrayList<String>();
+        List<String> fft_mag_grav = new ArrayList<String>();
+        List<String> fft_complex_grav = new ArrayList<String>();
+
+        //acc
+        list.add(timestamp);
+        list.add(data_acc);
+        list.add(fft_freq_acc);
+        list.add(serie_acc);
+        list.add(fft_mag_acc);
+        list.add(fft_complex_acc);
+
+        //gyro
+        list.add(data_gyro);
+        list.add(fft_freq_gyro);
+        list.add(serie_gyro);
+        list.add(fft_mag_gyro);
+        list.add(fft_complex_gyro);
+
+        //grav
+        list.add(data_grav);
+        list.add(fft_freq_grav);
+        list.add(serie_grav);
+        list.add(fft_mag_grav);
+        list.add(fft_complex_grav);
+
         int aux=0;
         for (int j=0; j < rows.size(); j++) {
             if(j!=0 && j % N == 0) {
-                fft.beforeAfter(fft, re, im);
-                for (int k=0; k < re.length; k++) {
-                    if(im[k]>0)
-                        fft_complex = String.valueOf(re[k]) + "+"+ String.valueOf(im[k])+"i";
-                    else if(im[k]<0)
-                        fft_complex = String.valueOf(re[k]) + String.valueOf(im[k])+"i";
+                //acc
+                fft.beforeAfter(fft, re_acc, im_acc);
+                for (int k=0; k < re_acc.length; k++) {
+                    if(im_acc[k]>0)
+                        fft_complex = String.valueOf(re_acc[k]) + "+"+ String.valueOf(im_acc[k])+"i";
+                    else if(im_acc[k]<0)
+                        fft_complex = String.valueOf(re_acc[k]) + String.valueOf(im_acc[k])+"i";
                     else
-                        fft_complex = String.valueOf(re[k]);
+                        fft_complex = String.valueOf(re_acc[k]);
 
                     fft_complex_array.add(fft_complex);
+
+                    complex = new Complex(re_acc[k],im_acc[k]);
+
+                    //FFT mag acc
+                    list.get(4).add(String.valueOf((double) 2/N * complex.abs()));
+
+                    //FFT complex acc
+                    list.get(5).add(fft_complex);
                 }
+                //gyro
+                fft.beforeAfter(fft, re_gyro, im_gyro);
+                for (int k=0; k < re_gyro.length; k++) {
+                    if(im_gyro[k]>0)
+                        fft_complex = String.valueOf(re_gyro[k]) + "+"+ String.valueOf(im_gyro[k])+"i";
+                    else if(im_gyro[k]<0)
+                        fft_complex = String.valueOf(re_gyro[k]) + String.valueOf(im_gyro[k])+"i";
+                    else
+                        fft_complex = String.valueOf(re_gyro[k]);
+
+                    fft_complex_array.add(fft_complex);
+
+                    complex = new Complex(re_gyro[k],im_gyro[k]);
+
+                    //FFT mag gyro
+                    list.get(9).add(String.valueOf((double) 2/N * complex.abs()));
+
+                    //FFT complex gyro
+                    list.get(10).add(fft_complex);
+                }
+                //grav
+                fft.beforeAfter(fft, re_grav, im_grav);
+                for (int k=0; k < re_grav.length; k++) {
+                    if(im_grav[k]>0)
+                        fft_complex = String.valueOf(re_grav[k]) + "+"+ String.valueOf(im_grav[k])+"i";
+                    else if(im_grav[k]<0)
+                        fft_complex = String.valueOf(re_grav[k]) + String.valueOf(im_grav[k])+"i";
+                    else
+                        fft_complex = String.valueOf(re_grav[k]);
+
+                    fft_complex_array.add(fft_complex);
+
+                    complex = new Complex(re_grav[k],im_grav[k]);
+
+                    //FFT mag grav
+                    list.get(14).add(String.valueOf((double) 2/N * complex.abs()));
+
+                    //FFT complex grav
+                    list.get(15).add(fft_complex);
+                }
+
+                //stop condition
+                if(j+N>rows.size())
+                    break;
+
                 aux=0;
-                re = new double[N];
-                im = new double[N];
+
+                //acc
+                re_acc = new double[N];
+                im_acc = new double[N];
+
+                //gyro
+                re_gyro = new double[N];
+                im_gyro = new double[N];
+
+                //grav
+                re_grav = new double[N];
+                im_grav = new double[N];
             }
+
+            //timestamp
+            list.get(0).add(rows.get(j)[3]);
             acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]),Double.parseDouble(rows.get(j)[5]),Double.parseDouble(rows.get(j)[6]));
-            re[aux] = acc_sqrt;
-            im[aux] = 0;
+            gyro_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[7]),Double.parseDouble(rows.get(j)[8]),Double.parseDouble(rows.get(j)[9]));
+            grav_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[10]),Double.parseDouble(rows.get(j)[11]),Double.parseDouble(rows.get(j)[12]));
+
+            //data_acc
+            list.get(1).add(String.valueOf(acc_sqrt));
+            //data_gyro
+            list.get(6).add(String.valueOf(gyro_sqrt));
+            //data_grav
+            list.get(11).add(String.valueOf(grav_sqrt));
+
+            //FFT freq acc
+            list.get(2).add(String.valueOf((double)aux*308/N));
+            //FFT freq gyro
+            list.get(7).add(String.valueOf((double)aux*308/N));
+            //FFT freq grav
+            list.get(12).add(String.valueOf((double)aux*308/N));
+
+            //serie acc
+            list.get(3).add(String.valueOf(aux));
+            //serie gyro
+            list.get(8).add(String.valueOf(aux));
+            //serie grav
+            list.get(13).add(String.valueOf(aux));
+
+            re_acc[aux] = acc_sqrt;
+            im_acc[aux] = 0;
+
+            re_gyro[aux] = gyro_sqrt;
+            im_gyro[aux] = 0;
+
+            re_grav[aux] = grav_sqrt;
+            im_grav[aux] = 0;
             aux++;
         }
 
         //convert list into array(used to copy debug values), While at the breakpoint, press Alt + F8. That opens Evaluate expression pop-up. Enter there the following code: Arrays.toString(fft_complex_array_values)
-        String[] fft_complex_array_values = (String[]) fft_complex_array.toArray(new String[fft_complex_array.size()]);
+        //String[] fft_complex_array_values = (String[]) fft_complex_array.toArray(new String[fft_complex_array.size()]);
+
 
         long time = System.currentTimeMillis();
-        double iter = 30000;
+      /*  double iter = 30000;
         for (int i = 0; i < iter; i++)
             fft.fft(re, im);
         time = System.currentTimeMillis() - time;
-        System.out.println("Averaged " + (time / iter) + "ms per iteration");
+        System.out.println("Averaged " + (time / iter) + "ms per iteration");*/
 
     }
 

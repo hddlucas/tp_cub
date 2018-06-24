@@ -71,7 +71,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         setContentView(R.layout.activity_main);
 
         //only for test
-        generateFourierTransform();
+        //generateFourierTransform();
+
+        generateArffFile();
 
         //find elements on view
         startBtn = (Button) findViewById(R.id.startBtn);
@@ -613,6 +615,182 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     }
 
 
+    private void generateArffFile() {
+        utils = new Utils(MainActivity.this);
+        List<String[]> rows = new ArrayList<>();
+
+        try {
+            FileManager csvReader = new FileManager(this.getApplicationContext());
+            rows = csvReader.readCSV("treino.csv");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int N = 64;
+        FFT fft = new FFT(N);
+        double[] window = fft.getWindow();
+
+        //acc
+        double[] re_acc = new double[N];
+        double[] im_acc = new double[N];
+
+        //gyro
+        double[] re_gyro = new double[N];
+        double[] im_gyro = new double[N];
+
+        //grav
+        double[] re_grav = new double[N];
+        double[] im_grav = new double[N];
+
+        String fft_complex="";
+
+        double acc_sqrt,gyro_sqrt,grav_sqrt;
+
+        List<List<String>> fftExcelData = new ArrayList<List<String>>();
+
+        List<String> accValues = new ArrayList<String>();
+        List<String> gyroValues = new ArrayList<String>();
+        List<String> gravValues = new ArrayList<String>();
+
+        //lines for sensors
+        fftExcelData.add(accValues);
+        fftExcelData.add(gyroValues);
+        fftExcelData.add(gravValues);
+
+        int aux=0;
+        for (int j=0; j < rows.size(); j++) {
+            if(j!=0 && j % N == 0) {
+                //acc
+                fft.beforeAfter(fft, re_acc, im_acc);
+                for (int k=0; k < re_acc.length; k++) {
+                    fft_complex = String.valueOf(re_acc[k]);
+                    //FFT complex acc
+                    fftExcelData.get(0).add(fft_complex);
+                }
+                //gyro
+                fft.beforeAfter(fft, re_gyro, im_gyro);
+                for (int k=0; k < re_gyro.length; k++) {
+                    fft_complex = String.valueOf(re_gyro[k]);
+                    complex = new Complex(re_gyro[k],im_gyro[k]);
+
+                    //FFT mag gyro
+                    fftExcelData.get(1).add(fft_complex);
+                }
+                //grav
+                fft.beforeAfter(fft, re_grav, im_grav);
+                for (int k=0; k < re_grav.length; k++) {
+                    fft_complex = String.valueOf(re_grav[k]);
+                    complex = new Complex(re_grav[k],im_grav[k]);
+
+                    //FFT complex
+                    fftExcelData.get(2).add(fft_complex);
+                }
+
+                //stop cycle
+                if(j+N>rows.size())
+                    break;
+
+                aux=0;
+
+                //acc
+                re_acc = new double[N];
+                im_acc = new double[N];
+
+                //gyro
+                re_gyro = new double[N];
+                im_gyro = new double[N];
+
+                //grav
+                re_grav = new double[N];
+                im_grav = new double[N];
+            }
+
+            acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]),Double.parseDouble(rows.get(j)[5]),Double.parseDouble(rows.get(j)[6]));
+            gyro_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[7]),Double.parseDouble(rows.get(j)[8]),Double.parseDouble(rows.get(j)[9]));
+            grav_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[10]),Double.parseDouble(rows.get(j)[11]),Double.parseDouble(rows.get(j)[12]));
+
+            re_acc[aux] = acc_sqrt;
+            im_acc[aux] = 0;
+
+            re_gyro[aux] = gyro_sqrt;
+            im_gyro[aux] = 0;
+
+            re_grav[aux] = grav_sqrt;
+            im_grav[aux] = 0;
+            aux++;
+        }
+
+        //transpose
+        List<List<String>> dataArff = new ArrayList<List<String>>();
+
+
+        int auxCont = 0;
+        for (int y=0; y < rows.size()-1; y++) {
+            if((64 + y) < fftExcelData.get(0).size()) {
+                dataArff.add(new ArrayList<String>());
+                for (int k = 0; k < 64; k++) {
+                    if ((k + y) < fftExcelData.get(0).size()) {
+                        dataArff.get(auxCont).add(fftExcelData.get(0).get(k + y));
+                        dataArff.get(auxCont).add(fftExcelData.get(1).get(k + y));
+                        dataArff.get(auxCont).add(fftExcelData.get(2).get(k + y));
+                    }
+                }
+                y += 64;
+                auxCont++;
+            }
+        }
+
+        try {
+            String path = this.getFilesDir() + "/" + "arffData.csv";
+
+            File file = new File(path);
+            if (!file.exists()) {
+                file.createNewFile();
+                FileOutputStream writer = new FileOutputStream(path);
+
+                String fileHeader = "";
+
+                int i;
+
+                for (i = 1; i <= 64; i++) {
+                    fileHeader += ("accelerometer" + i + ",");
+                }
+
+                //fileHeader += ("accelerometerMax" + ",");
+
+                for (i = 1; i <= 64; i++) {
+                    fileHeader += ("gyroscope" + i + ",");
+                }
+
+                //fileHeader += ("accelerometerMax" + ",");
+
+                for (i = 1; i <= 64; i++) {
+                    fileHeader += ("gravity" + i + ",");
+                }
+
+                //fileHeader += ("gravityMax" + ",");
+
+                fileHeader += ("activity\n");
+
+                writer.write((fileHeader).getBytes());
+
+                Iterator<List<String>> iter = dataArff.iterator();
+                while(iter.hasNext()){
+                    Iterator<String> siter = iter.next().iterator();
+                    while(siter.hasNext()){
+                        String s = siter.next() + ",";
+                        writer.write((s).getBytes());
+                    }
+                    writer.write(("\n").getBytes());
+                }
+
+                writer.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
 

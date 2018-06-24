@@ -419,7 +419,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             aux++;
         }
 
-        //convert list into array(used to copy debug values), While at the breakpoint, press Alt + F8. That opens Evaluate expression pop-up. Enter there the following code: Arrays.toString(newReals)
+        //convert list into array(used to copy debug values), While at the breakpoint, press Alt + F8. That opens Evaluate expression pop-up. Enter there the following code: Arrays.toString(fft_complex_array_values)
         String[] fft_complex_array_values = (String[]) fft_complex_array.toArray(new String[fft_complex_array.size()]);
 
         long time = System.currentTimeMillis();

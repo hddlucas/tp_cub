@@ -391,15 +391,23 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         double[] window = fft.getWindow();
         double[] re = new double[N];
         double[] im = new double[N];
+        String fft_complex="";
 
         double acc_sqrt;
-        ArrayList reals = new ArrayList<Double>();
+        ArrayList fft_complex_array = new ArrayList<String>();
         int aux=0;
         for (int j=0; j < rows.size(); j++) {
             if(j!=0 && j % N == 0) {
                 fft.beforeAfter(fft, re, im);
                 for (int k=0; k < re.length; k++) {
-                    reals.add(re[k]);
+                    if(im[k]>0)
+                        fft_complex = String.valueOf(re[k]) + "+"+ String.valueOf(im[k])+"i";
+                    else if(im[k]<0)
+                        fft_complex = String.valueOf(re[k]) + String.valueOf(im[k])+"i";
+                    else
+                        fft_complex = String.valueOf(re[k]);
+
+                    fft_complex_array.add(fft_complex);
                 }
                 aux=0;
                 re = new double[N];
@@ -411,6 +419,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             aux++;
         }
 
+        //convert list into array(used to copy debug values), While at the breakpoint, press Alt + F8. That opens Evaluate expression pop-up. Enter there the following code: Arrays.toString(newReals)
+        String[] fft_complex_array_values = (String[]) fft_complex_array.toArray(new String[fft_complex_array.size()]);
 
         long time = System.currentTimeMillis();
         double iter = 30000;

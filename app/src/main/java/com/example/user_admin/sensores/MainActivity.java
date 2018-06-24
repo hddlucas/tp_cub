@@ -17,9 +17,11 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 
 import static android.util.Half.EPSILON;
@@ -374,7 +376,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
     private void generateFourierTransform() {
         utils = new Utils(MainActivity.this);
-
         List<String[]> rows = new ArrayList<>();
 
         try {
@@ -406,7 +407,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         double acc_sqrt,gyro_sqrt,grav_sqrt;
 
         ArrayList fft_complex_array = new ArrayList<String>();
-        List<List<String>> list = new ArrayList<List<String>>();
+        List<List<String>> fftExcelData = new ArrayList<List<String>>();
         List<String> timestamp = new ArrayList<String>();
 
         List<String> data_acc = new ArrayList<String>();
@@ -428,26 +429,26 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         List<String> fft_complex_grav = new ArrayList<String>();
 
         //acc
-        list.add(timestamp);
-        list.add(data_acc);
-        list.add(fft_freq_acc);
-        list.add(serie_acc);
-        list.add(fft_mag_acc);
-        list.add(fft_complex_acc);
+        fftExcelData.add(timestamp);
+        fftExcelData.add(data_acc);
+        fftExcelData.add(fft_freq_acc);
+        fftExcelData.add(serie_acc);
+        fftExcelData.add(fft_mag_acc);
+        fftExcelData.add(fft_complex_acc);
 
         //gyro
-        list.add(data_gyro);
-        list.add(fft_freq_gyro);
-        list.add(serie_gyro);
-        list.add(fft_mag_gyro);
-        list.add(fft_complex_gyro);
+        fftExcelData.add(data_gyro);
+        fftExcelData.add(fft_freq_gyro);
+        fftExcelData.add(serie_gyro);
+        fftExcelData.add(fft_mag_gyro);
+        fftExcelData.add(fft_complex_gyro);
 
         //grav
-        list.add(data_grav);
-        list.add(fft_freq_grav);
-        list.add(serie_grav);
-        list.add(fft_mag_grav);
-        list.add(fft_complex_grav);
+        fftExcelData.add(data_grav);
+        fftExcelData.add(fft_freq_grav);
+        fftExcelData.add(serie_grav);
+        fftExcelData.add(fft_mag_grav);
+        fftExcelData.add(fft_complex_grav);
 
         int aux=0;
         for (int j=0; j < rows.size(); j++) {
@@ -462,15 +463,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     else
                         fft_complex = String.valueOf(re_acc[k]);
 
-                    fft_complex_array.add(fft_complex);
-
+                    //fft_complex_array.add(fft_complex);
                     complex = new Complex(re_acc[k],im_acc[k]);
 
                     //FFT mag acc
-                    list.get(4).add(String.valueOf((double) 2/N * complex.abs()));
+                    fftExcelData.get(4).add(String.valueOf((double) 2/N * complex.abs()));
 
                     //FFT complex acc
-                    list.get(5).add(fft_complex);
+                    fftExcelData.get(5).add(fft_complex);
                 }
                 //gyro
                 fft.beforeAfter(fft, re_gyro, im_gyro);
@@ -482,15 +482,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     else
                         fft_complex = String.valueOf(re_gyro[k]);
 
-                    fft_complex_array.add(fft_complex);
-
+                    //fft_complex_array.add(fft_complex);
                     complex = new Complex(re_gyro[k],im_gyro[k]);
 
                     //FFT mag gyro
-                    list.get(9).add(String.valueOf((double) 2/N * complex.abs()));
+                    fftExcelData.get(9).add(String.valueOf((double) 2/N * complex.abs()));
 
                     //FFT complex gyro
-                    list.get(10).add(fft_complex);
+                    fftExcelData.get(10).add(fft_complex);
                 }
                 //grav
                 fft.beforeAfter(fft, re_grav, im_grav);
@@ -502,18 +501,17 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     else
                         fft_complex = String.valueOf(re_grav[k]);
 
-                    fft_complex_array.add(fft_complex);
-
+                    //fft_complex_array.add(fft_complex);
                     complex = new Complex(re_grav[k],im_grav[k]);
 
                     //FFT mag grav
-                    list.get(14).add(String.valueOf((double) 2/N * complex.abs()));
+                    fftExcelData.get(14).add(String.valueOf((double) 2/N * complex.abs()));
 
                     //FFT complex grav
-                    list.get(15).add(fft_complex);
+                    fftExcelData.get(15).add(fft_complex);
                 }
 
-                //stop condition
+                //stop cycle
                 if(j+N>rows.size())
                     break;
 
@@ -533,31 +531,31 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             }
 
             //timestamp
-            list.get(0).add(rows.get(j)[3]);
+            fftExcelData.get(0).add(rows.get(j)[3]);
             acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]),Double.parseDouble(rows.get(j)[5]),Double.parseDouble(rows.get(j)[6]));
             gyro_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[7]),Double.parseDouble(rows.get(j)[8]),Double.parseDouble(rows.get(j)[9]));
             grav_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[10]),Double.parseDouble(rows.get(j)[11]),Double.parseDouble(rows.get(j)[12]));
 
             //data_acc
-            list.get(1).add(String.valueOf(acc_sqrt));
+            fftExcelData.get(1).add(String.valueOf(acc_sqrt));
             //data_gyro
-            list.get(6).add(String.valueOf(gyro_sqrt));
+            fftExcelData.get(6).add(String.valueOf(gyro_sqrt));
             //data_grav
-            list.get(11).add(String.valueOf(grav_sqrt));
+            fftExcelData.get(11).add(String.valueOf(grav_sqrt));
 
             //FFT freq acc
-            list.get(2).add(String.valueOf((double)aux*308/N));
+            fftExcelData.get(2).add(String.valueOf((double)aux*308/N));
             //FFT freq gyro
-            list.get(7).add(String.valueOf((double)aux*308/N));
+            fftExcelData.get(7).add(String.valueOf((double)aux*308/N));
             //FFT freq grav
-            list.get(12).add(String.valueOf((double)aux*308/N));
+            fftExcelData.get(12).add(String.valueOf((double)aux*308/N));
 
             //serie acc
-            list.get(3).add(String.valueOf(aux));
+            fftExcelData.get(3).add(String.valueOf(aux));
             //serie gyro
-            list.get(8).add(String.valueOf(aux));
+            fftExcelData.get(8).add(String.valueOf(aux));
             //serie grav
-            list.get(13).add(String.valueOf(aux));
+            fftExcelData.get(13).add(String.valueOf(aux));
 
             re_acc[aux] = acc_sqrt;
             im_acc[aux] = 0;
@@ -570,11 +568,42 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             aux++;
         }
 
+        //transpose
+        fftExcelData  = utils.transpose(fftExcelData);
+
+        try {
+            String path = this.getFilesDir() + "/" + "excelData.csv";
+
+            File file = new File(path);
+            if (!file.exists()) {
+                file.createNewFile();
+                FileOutputStream writer = new FileOutputStream(path);
+
+                String fileHeader = "Time,Data ACC,FFT freq ACC,Série,FFT mag ACC,FFT Complex ACC,Data GYRO,FFT freq GYRO,Série,FFT mag GYRO,FFT Complex GYRO,Data GRAV,FFT freq GRAV,Série,FFT mag GRAV,FFT Complex GRAV";
+                writer.write((fileHeader).getBytes());
+
+                Iterator<List<String>> iter = fftExcelData.iterator();
+                while(iter.hasNext()){
+                    Iterator<String> siter = iter.next().iterator();
+                    while(siter.hasNext()){
+                        String s = siter.next() + ",";
+                        writer.write((s).getBytes());
+                    }
+                    writer.write(("\n").getBytes());
+                }
+
+                writer.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         //convert list into array(used to copy debug values), While at the breakpoint, press Alt + F8. That opens Evaluate expression pop-up. Enter there the following code: Arrays.toString(fft_complex_array_values)
         //String[] fft_complex_array_values = (String[]) fft_complex_array.toArray(new String[fft_complex_array.size()]);
 
-
         long time = System.currentTimeMillis();
+
       /*  double iter = 30000;
         for (int i = 0; i < iter; i++)
             fft.fft(re, im);

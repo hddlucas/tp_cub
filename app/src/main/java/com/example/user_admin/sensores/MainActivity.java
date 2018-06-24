@@ -579,7 +579,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 file.createNewFile();
                 FileOutputStream writer = new FileOutputStream(path);
 
-                String fileHeader = "Time,Data ACC,FFT freq ACC,Série,FFT mag ACC,FFT Complex ACC,Data GYRO,FFT freq GYRO,Série,FFT mag GYRO,FFT Complex GYRO,Data GRAV,FFT freq GRAV,Série,FFT mag GRAV,FFT Complex GRAV";
+                String fileHeader = "Time,Data ACC,FFT freq ACC,Série,FFT mag ACC,FFT Complex ACC,Data GYRO,FFT freq GYRO,Série,FFT mag GYRO,FFT Complex GYRO,Data GRAV,FFT freq GRAV,Série,FFT mag GRAV,FFT Complex GRAV\n";
                 writer.write((fileHeader).getBytes());
 
                 Iterator<List<String>> iter = fftExcelData.iterator();

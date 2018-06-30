@@ -71,8 +71,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         setContentView(R.layout.activity_main);
 
         //only for test
-        generateFourierTransform();
-
+        //generateFourierTransform();
         //generateArffFile();
 
         //find elements on view
@@ -688,92 +687,97 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         fftExcelData.add(accValues);
         fftExcelData.add(gyroValues);
         fftExcelData.add(gravValues);
+        String activity = "WALKING";
 
         int aux = 0;
-        for (int j = 0; j < rows.size(); j++) {
-            if (j != 0 && j % N == 0) {
-                //acc
-                fft.beforeAfter(fft, re_acc, im_acc);
-                for (int k = 0; k < re_acc.length; k++) {
-                    fft_complex = String.valueOf(re_acc[k]);
-                    //FFT complex acc
-                    fftExcelData.get(0).add(fft_complex);
+        for (int j = 0,x = 0; j < rows.size(); j++) {
+            if (j + N > rows.size())
+                break;
+            if (rows.get(j)[14].equals(activity)) {
+                if (x != 0 && x % N == 0) {
+                    //acc
+                    fft.beforeAfter(fft, re_acc, im_acc);
+                    for (int k = 0; k < re_acc.length; k++) {
+                        fft_complex = String.valueOf(re_acc[k]);
+                        //FFT complex acc
+                        fftExcelData.get(0).add(fft_complex);
+                    }
+                    //gyro
+                    fft.beforeAfter(fft, re_gyro, im_gyro);
+                    for (int k = 0; k < re_gyro.length; k++) {
+                        fft_complex = String.valueOf(re_gyro[k]);
+
+                        //FFT mag gyro
+                        fftExcelData.get(1).add(fft_complex);
+                    }
+                    //grav
+                    fft.beforeAfter(fft, re_grav, im_grav);
+                    for (int k = 0; k < re_grav.length; k++) {
+                        fft_complex = String.valueOf(re_grav[k]);
+
+                        //FFT complex
+                        fftExcelData.get(2).add(fft_complex);
+                    }
+
+                    //stop cycle
+                    if (j + N > rows.size())
+                        break;
+
+                    aux = 0;
+
+                    //acc
+                    re_acc = new double[N];
+                    im_acc = new double[N];
+
+                    //gyro
+                    re_gyro = new double[N];
+                    im_gyro = new double[N];
+
+                    //grav
+                    re_grav = new double[N];
+                    im_grav = new double[N];
                 }
-                //gyro
-                fft.beforeAfter(fft, re_gyro, im_gyro);
-                for (int k = 0; k < re_gyro.length; k++) {
-                    fft_complex = String.valueOf(re_gyro[k]);
-                    complex = new Complex(re_gyro[k], im_gyro[k]);
 
-                    //FFT mag gyro
-                    fftExcelData.get(1).add(fft_complex);
-                }
-                //grav
-                fft.beforeAfter(fft, re_grav, im_grav);
-                for (int k = 0; k < re_grav.length; k++) {
-                    fft_complex = String.valueOf(re_grav[k]);
-                    complex = new Complex(re_grav[k], im_grav[k]);
+                acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]), Double.parseDouble(rows.get(j)[5]), Double.parseDouble(rows.get(j)[6]));
+                gyro_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[7]), Double.parseDouble(rows.get(j)[8]), Double.parseDouble(rows.get(j)[9]));
+                grav_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[10]), Double.parseDouble(rows.get(j)[11]), Double.parseDouble(rows.get(j)[12]));
 
-                    //FFT complex
-                    fftExcelData.get(2).add(fft_complex);
-                }
+                re_acc[aux] = acc_sqrt;
+                im_acc[aux] = 0;
 
-                //stop cycle
-                if (j + N > rows.size())
-                    break;
+                re_gyro[aux] = gyro_sqrt;
+                im_gyro[aux] = 0;
 
-                aux = 0;
+                re_grav[aux] = grav_sqrt;
+                im_grav[aux] = 0;
+                aux++;
+                x++;
 
-                //acc
-                re_acc = new double[N];
-                im_acc = new double[N];
-
-                //gyro
-                re_gyro = new double[N];
-                im_gyro = new double[N];
-
-                //grav
-                re_grav = new double[N];
-                im_grav = new double[N];
             }
-
-            acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]), Double.parseDouble(rows.get(j)[5]), Double.parseDouble(rows.get(j)[6]));
-            gyro_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[7]), Double.parseDouble(rows.get(j)[8]), Double.parseDouble(rows.get(j)[9]));
-            grav_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[10]), Double.parseDouble(rows.get(j)[11]), Double.parseDouble(rows.get(j)[12]));
-
-            re_acc[aux] = acc_sqrt;
-            im_acc[aux] = 0;
-
-            re_gyro[aux] = gyro_sqrt;
-            im_gyro[aux] = 0;
-
-            re_grav[aux] = grav_sqrt;
-            im_grav[aux] = 0;
-            aux++;
         }
 
+        int total_sensors=3;
         //transpose
         List<List<String>> dataArff = new ArrayList<List<String>>();
-
-
         int auxCont = 0;
-        for (int y = 0; y < rows.size() - 1; y++) {
-            if ((64 + y) < fftExcelData.get(0).size()) {
+        int aux2=0;
+        for (int y = 0; y < fftExcelData.get(0).size(); y++) {
+            if ((N + aux2) <= fftExcelData.get(0).size()) {
                 dataArff.add(new ArrayList<String>());
-                for (int k = 0; k < 64; k++) {
-                    if ((k + y) < fftExcelData.get(0).size()) {
-                        dataArff.get(auxCont).add(fftExcelData.get(0).get(k + y));
-                        dataArff.get(auxCont).add(fftExcelData.get(1).get(k + y));
-                        dataArff.get(auxCont).add(fftExcelData.get(2).get(k + y));
+                for (int l = 0; l < total_sensors; l++) {
+                    for (int k = 0; k < N; k++) {
+                        dataArff.get(auxCont).add(fftExcelData.get(l).get(k + aux2));
                     }
                 }
-                y += 64;
+                dataArff.get(auxCont).add(activity);
+
+                aux2 += N;
                 auxCont++;
             }
         }
 
         try {
-            String path = this.getFilesDir() + "/" + "arffData.csv";
+            String path = this.getFilesDir() + "/" +activity + "_arffData.csv";
 
             File file = new File(path);
             if (!file.exists()) {
@@ -784,19 +788,19 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
                 int i;
 
-                for (i = 1; i <= 64; i++) {
+                for (i = 1; i <= N; i++) {
                     fileHeader += ("accelerometer" + i + ",");
                 }
 
                 //fileHeader += ("accelerometerMax" + ",");
 
-                for (i = 1; i <= 64; i++) {
+                for (i = 1; i <= N; i++) {
                     fileHeader += ("gyroscope" + i + ",");
                 }
 
                 //fileHeader += ("accelerometerMax" + ",");
 
-                for (i = 1; i <= 64; i++) {
+                for (i = 1; i <= N; i++) {
                     fileHeader += ("gravity" + i + ",");
                 }
 

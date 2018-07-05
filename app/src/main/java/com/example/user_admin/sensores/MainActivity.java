@@ -71,8 +71,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         setContentView(R.layout.activity_main);
 
         //only for test
-        generateFourierTransform();
+        //generateFourierTransform();
         //generateArffFile();
+        //calculateAvarage();
 
         //find elements on view
         startBtn = (Button) findViewById(R.id.startBtn);
@@ -454,7 +455,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         fftExcelData.add(fft_complex_grav);
         fftExcelData.add(current_activity);
 
-        String activity = "RUNNING";
+        String activity = "DRIVING";
         int aux = 0;
 
         for (int j = 0, x = 0; j < rows.size(); j++) {
@@ -826,6 +827,196 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             e.printStackTrace();
         }
     }
+
+
+    private void calculateAvarage() {
+        utils = new Utils(MainActivity.this);
+        List<String[]> rows = new ArrayList<>();
+
+        try {
+            FileManager csvReader = new FileManager(this.getApplicationContext());
+            rows = csvReader.readCSV("treino.csv");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int N = 64;
+
+        List<List<String>> fftExcelData = new ArrayList<List<String>>();
+
+        List<String> lat = new ArrayList<String>();
+        List<String> lng = new ArrayList<String>();
+        List<String> alt = new ArrayList<String>();
+
+        List<String> timestamp = new ArrayList<String>();
+
+        List<String> x_acc = new ArrayList<String>();
+        List<String> y_acc = new ArrayList<String>();
+        List<String> z_acc = new ArrayList<String>();
+
+        List<String> x_gyro = new ArrayList<String>();
+        List<String> y_gyro = new ArrayList<String>();
+        List<String> z_gyro = new ArrayList<String>();
+
+        List<String> x_grav = new ArrayList<String>();
+        List<String> y_grav = new ArrayList<String>();
+        List<String> z_grav = new ArrayList<String>();
+        List<String> lum = new ArrayList<String>();
+        List<String> current_activity = new ArrayList<String>();
+
+        fftExcelData.add(lat);
+        fftExcelData.add(lng);
+        fftExcelData.add(alt);
+
+        fftExcelData.add(timestamp);
+
+        fftExcelData.add(x_acc);
+        fftExcelData.add(y_acc);
+        fftExcelData.add(z_acc);
+
+        fftExcelData.add(x_gyro);
+        fftExcelData.add(y_gyro);
+        fftExcelData.add(z_gyro);
+
+        fftExcelData.add(x_grav);
+        fftExcelData.add(y_grav);
+        fftExcelData.add(z_grav);
+
+        fftExcelData.add(lum);
+        fftExcelData.add(current_activity);
+
+
+        double  media_lat=0.0,
+                media_lng=0.0,
+                media_alt=0.0,
+
+                media_timestamp=0.0,
+                media_x_acc=0.0,
+                media_y_acc=0.0,
+                media_z_acc=0.0,
+                media_x_gyro=0.0,
+                media_y_gyro=0.0,
+                media_z_gyro=0.0,
+                media_x_grav=0.0,
+                media_y_grav=0.0,
+                media_z_grav=0.0,
+                media_lum=0.0;
+
+        String activity = "RUNNING";
+        int aux = 0;
+
+        for (int j = 0, x = 0; j < rows.size(); j++) {
+            //stop cycle
+            if (j + N > rows.size())
+                break;
+
+            if (rows.get(j)[14].equals(activity)) {
+                if (x != 0 && x % N == 0) {
+
+                    fftExcelData.get(0).add(Double.toString(media_lat/N));
+                    fftExcelData.get(1).add(Double.toString(media_lng/N));
+                    fftExcelData.get(2).add(Double.toString(media_alt/N));
+
+                    fftExcelData.get(3).add(rows.get(j)[3]);
+
+                    fftExcelData.get(4).add(Double.toString(media_x_acc/N));
+                    fftExcelData.get(5).add(Double.toString(media_y_acc/N));
+                    fftExcelData.get(6).add(Double.toString(media_z_acc/N));
+
+                    fftExcelData.get(7).add(Double.toString(media_x_gyro/N));
+                    fftExcelData.get(8).add(Double.toString(media_y_gyro/N));
+                    fftExcelData.get(9).add(Double.toString(media_z_gyro/N));
+
+                    fftExcelData.get(10).add(Double.toString(media_x_grav/N));
+                    fftExcelData.get(11).add(Double.toString(media_y_grav/N));
+                    fftExcelData.get(12).add(Double.toString(media_z_grav/N));
+
+                    fftExcelData.get(13).add(Double.toString(media_lum/N));
+                    fftExcelData.get(14).add(activity);
+
+                    media_lat=0.0;
+                    media_lng=0.0;
+                    media_alt=0.0;
+                    media_timestamp=0.0;
+                    media_x_acc=0.0;
+                    media_y_acc=0.0;
+                    media_z_acc=0.0;
+                    media_x_gyro=0.0;
+                    media_y_gyro=0.0;
+                    media_z_gyro=0.0;
+                    media_x_grav=0.0;
+                    media_y_grav=0.0;
+                    media_z_grav=0.0;
+                    media_lum=0.0;
+
+                }
+
+                media_lat+=Double.parseDouble(rows.get(j)[0]);
+                media_lng=Double.parseDouble(rows.get(j)[1]);
+                media_alt=Double.parseDouble(rows.get(j)[2]);
+
+                media_x_acc=Double.parseDouble(rows.get(j)[4]);
+                media_y_acc=Double.parseDouble(rows.get(j)[5]);
+                media_z_acc=Double.parseDouble(rows.get(j)[6]);
+
+                media_x_gyro=Double.parseDouble(rows.get(j)[7]);
+                media_y_gyro=Double.parseDouble(rows.get(j)[8]);
+                media_z_gyro=Double.parseDouble(rows.get(j)[9]);
+
+                media_x_grav=Double.parseDouble(rows.get(j)[10]);
+                media_y_grav=Double.parseDouble(rows.get(j)[11]);
+                media_z_grav=Double.parseDouble(rows.get(j)[12]);
+                media_lum=Double.parseDouble(rows.get(j)[13]);
+                x++;
+            }
+        }
+
+        //transpose
+        fftExcelData = utils.transpose(fftExcelData);
+
+        try {
+
+            String path = this.getFilesDir() + "/" +activity + "_Average.csv";
+
+            File file = new File(path);
+            if (!file.exists()) {
+                file.createNewFile();
+                FileOutputStream writer = new FileOutputStream(path);
+
+                String fileHeader = "lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_grav,y_grav,z_grav,lum,activity\n";
+                writer.write((fileHeader).getBytes());
+
+                Iterator<List<String>> iter = fftExcelData.iterator();
+                while (iter.hasNext()) {
+                    Iterator<String> siter = iter.next().iterator();
+                    while (siter.hasNext()) {
+                        String s = siter.next() + ",";
+                        writer.write((s).getBytes());
+                    }
+                    writer.write(("\n").getBytes());
+                }
+
+                writer.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        //convert list into array(used to copy debug values), While at the breakpoint, press Alt + F8. That opens Evaluate expression pop-up. Enter there the following code: Arrays.toString(fft_complex_array_values)
+        //String[] fft_complex_array_values = (String[]) fft_complex_array.toArray(new String[fft_complex_array.size()]);
+
+        long time = System.currentTimeMillis();
+
+      /*  double iter = 30000;
+        for (int i = 0; i < iter; i++)
+            fft.fft(re, im);
+        time = System.currentTimeMillis() - time;
+        System.out.println("Averaged " + (time / iter) + "ms per iteration");*/
+
+    }
+
 
 }
 

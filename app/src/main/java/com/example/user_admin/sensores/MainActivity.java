@@ -71,7 +71,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         setContentView(R.layout.activity_main);
 
         //only for test
-        //generateFourierTransform();
+        generateFourierTransform();
         //generateArffFile();
 
         //find elements on view
@@ -454,7 +454,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         fftExcelData.add(fft_complex_grav);
         fftExcelData.add(current_activity);
 
-        String activity = "WALKING";
+        String activity = "RUNNING";
         int aux = 0;
 
         for (int j = 0, x = 0; j < rows.size(); j++) {
@@ -539,7 +539,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 }
 
                 //timestamp
-                fftExcelData.get(0).add(rows.get(x)[3]);
+                fftExcelData.get(0).add(rows.get(j)[3]);
                 acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]), Double.parseDouble(rows.get(j)[5]), Double.parseDouble(rows.get(j)[6]));
                 gyro_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[7]), Double.parseDouble(rows.get(j)[8]), Double.parseDouble(rows.get(j)[9]));
                 grav_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[10]), Double.parseDouble(rows.get(j)[11]), Double.parseDouble(rows.get(j)[12]));

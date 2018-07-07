@@ -13,7 +13,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.example.user_admin.sensores.MainActivity.ARFFFILE;
+import static com.example.user_admin.sensores.MainActivity.ARFFFILENAME;
+import static com.example.user_admin.sensores.MainActivity.CICLICAL_ACTIVITIES;
+import static com.example.user_admin.sensores.MainActivity.FFTFILEHEADER;
+import static com.example.user_admin.sensores.MainActivity.FFTFILENAME;
 import static com.example.user_admin.sensores.MainActivity.FILEHEADER;
 import static com.example.user_admin.sensores.MainActivity.SENSORSDATAAVERAGEFILENAME;
 
@@ -243,13 +246,10 @@ public class Utils {
     }
 
     public void generateArffFile() {
-
-
-
         FileManager fileManager;
         Utils utils;
         fileManager = new FileManager(context);
-        fileManager.deleteFile(ARFFFILE);
+        fileManager.deleteFile(ARFFFILENAME);
         utils = new Utils(context);
 
         List<String[]> rows = new ArrayList<>();
@@ -263,28 +263,21 @@ public class Utils {
 
         int N = 64;
         FFT fft = new FFT(N);
-
         String fileHeader = "";
-
         int i;
-
         for (i = 1; i <= N; i++) {
             fileHeader += ("accelerometer" + i + ",");
         }
-
         for (i = 1; i <= N; i++) {
             fileHeader += ("gyroscope" + i + ",");
         }
-
         for (i = 1; i <= N; i++) {
             fileHeader += ("gravity" + i + ",");
         }
-
         fileHeader += ("activity\n");
 
         double acc_sqrt, gyro_sqrt, grav_sqrt;
-        String[] ciclical_activities = new String[]{"WALKING","RUNNING","DRIVING"};
-        for (int a = 0; a < ciclical_activities.length; a++) {
+        for (int a = 0; a < CICLICAL_ACTIVITIES.length; a++) {
             String fft_complex = "";
             double[] window = fft.getWindow();
             //acc
@@ -310,7 +303,7 @@ public class Utils {
             for (int j = 0, x = 0; j < rows.size(); j++) {
                 if (j + N > rows.size())
                     break;
-                if (rows.get(j)[14].equals(ciclical_activities[a])) {
+                if (rows.get(j)[14].equals(CICLICAL_ACTIVITIES[a])) {
                     if (x != 0 && x % N == 0) {
                         //acc
                         fft.beforeAfter(fft, re_acc, im_acc);
@@ -378,24 +371,21 @@ public class Utils {
             for (int y = 0; y < fftExcelData.get(0).size(); y++) {
                 if ((N + aux2) <= fftExcelData.get(0).size()) {
                     dataArff.add(new ArrayList<String>());
-                    for (int l = 0; l < ciclical_activities.length; l++) {
+                    for (int l = 0; l < CICLICAL_ACTIVITIES.length; l++) {
                         for (int k = 0; k < N; k++) {
                             dataArff.get(auxCont).add(fftExcelData.get(l).get(k + aux2));
                         }
                     }
-                    dataArff.get(auxCont).add(ciclical_activities[a]);
-
+                    dataArff.get(auxCont).add(CICLICAL_ACTIVITIES[a]);
                     aux2 += N;
                     auxCont++;
                 }
             }
-            fileManager.createFile(context.getFilesDir() + "/" + ARFFFILE,fileHeader);
+            fileManager.createFile(context.getFilesDir() + "/" + ARFFFILENAME,fileHeader);
             FileOutputStream outputStream;
 
             try {
-                outputStream = context.openFileOutput(ARFFFILE, Context.MODE_APPEND);
-
-
+                outputStream = context.openFileOutput(ARFFFILENAME, Context.MODE_APPEND);
                 Iterator<List<String>> iter = dataArff.iterator();
                 while (iter.hasNext()) {
                     Iterator<String> siter = iter.next().iterator();
@@ -405,12 +395,263 @@ public class Utils {
                     }
                     outputStream.write(("\n").getBytes());
                 }
-
                 outputStream.close();
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
+
+    public void generateFourierTransform() {
+        FileManager fileManager;
+        Complex complex;
+        Utils utils;
+        fileManager = new FileManager(context);
+        fileManager.deleteFile(FFTFILENAME);
+        utils = new Utils(context);
+        List<String[]> rows = new ArrayList<>();
+
+        try {
+            FileManager csvReader = new FileManager(context);
+            rows = csvReader.readCSV("treino.csv");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int N = 64;
+        FFT fft = new FFT(N);
+
+        for (int a = 0; a < CICLICAL_ACTIVITIES.length; a++) {
+            double[] window = fft.getWindow();
+
+            //acc
+            double[] re_acc = new double[N];
+            double[] im_acc = new double[N];
+
+            //gyro
+            double[] re_gyro = new double[N];
+            double[] im_gyro = new double[N];
+
+            //grav
+            double[] re_grav = new double[N];
+            double[] im_grav = new double[N];
+
+            String fft_complex = "";
+
+            double acc_sqrt, gyro_sqrt, grav_sqrt;
+
+            int aux = 0;
+            ArrayList fft_complex_array = new ArrayList<String>();
+            List<List<String>> fftExcelData = new ArrayList<List<String>>();
+            List<String> timestamp = new ArrayList<String>();
+
+            List<String> data_acc = new ArrayList<String>();
+            List<String> fft_freq_acc = new ArrayList<String>();
+            List<String> serie_acc = new ArrayList<String>();
+            List<String> fft_mag_acc = new ArrayList<String>();
+            List<String> fft_complex_acc = new ArrayList<String>();
+
+            List<String> data_gyro = new ArrayList<String>();
+            List<String> fft_freq_gyro = new ArrayList<String>();
+            List<String> serie_gyro = new ArrayList<String>();
+            List<String> fft_mag_gyro = new ArrayList<String>();
+            List<String> fft_complex_gyro = new ArrayList<String>();
+
+            List<String> data_grav = new ArrayList<String>();
+            List<String> fft_freq_grav = new ArrayList<String>();
+            List<String> serie_grav = new ArrayList<String>();
+            List<String> fft_mag_grav = new ArrayList<String>();
+            List<String> fft_complex_grav = new ArrayList<String>();
+            List<String> current_activity = new ArrayList<String>();
+
+            //acc
+            fftExcelData.add(timestamp);
+            fftExcelData.add(data_acc);
+            fftExcelData.add(fft_freq_acc);
+            fftExcelData.add(serie_acc);
+            fftExcelData.add(fft_mag_acc);
+            fftExcelData.add(fft_complex_acc);
+
+            //gyro
+            fftExcelData.add(data_gyro);
+            fftExcelData.add(fft_freq_gyro);
+            fftExcelData.add(serie_gyro);
+            fftExcelData.add(fft_mag_gyro);
+            fftExcelData.add(fft_complex_gyro);
+
+            //grav
+            fftExcelData.add(data_grav);
+            fftExcelData.add(fft_freq_grav);
+            fftExcelData.add(serie_grav);
+            fftExcelData.add(fft_mag_grav);
+            fftExcelData.add(fft_complex_grav);
+            fftExcelData.add(current_activity);
+            for (int j = 0, x = 0; j < rows.size(); j++) {
+                //stop cycle
+                if (j + N > rows.size())
+                    break;
+
+                if (rows.get(j)[14].equals(CICLICAL_ACTIVITIES[a])) {
+                    if (x != 0 && x % N == 0) {
+                        //acc
+                        fft.beforeAfter(fft, re_acc, im_acc);
+                        for (int k = 0; k < re_acc.length; k++) {
+                            if (im_acc[k] > 0)
+                                fft_complex = String.valueOf(re_acc[k]) + "+" + String.valueOf(im_acc[k]) + "i";
+                            else if (im_acc[k] < 0)
+                                fft_complex = String.valueOf(re_acc[k]) + String.valueOf(im_acc[k]) + "i";
+                            else
+                                fft_complex = String.valueOf(re_acc[k]);
+
+                            //fft_complex_array.add(fft_complex);
+                            complex = new Complex(re_acc[k], im_acc[k]);
+
+                            //FFT mag acc
+                            fftExcelData.get(4).add(String.valueOf((double) 2 / N * complex.abs()));
+
+                            //FFT complex acc
+                            fftExcelData.get(5).add(fft_complex);
+                        }
+                        //gyro
+                        fft.beforeAfter(fft, re_gyro, im_gyro);
+                        for (int k = 0; k < re_gyro.length; k++) {
+                            if (im_gyro[k] > 0)
+                                fft_complex = String.valueOf(re_gyro[k]) + "+" + String.valueOf(im_gyro[k]) + "i";
+                            else if (im_gyro[k] < 0)
+                                fft_complex = String.valueOf(re_gyro[k]) + String.valueOf(im_gyro[k]) + "i";
+                            else
+                                fft_complex = String.valueOf(re_gyro[k]);
+
+                            //fft_complex_array.add(fft_complex);
+                            complex = new Complex(re_gyro[k], im_gyro[k]);
+
+                            //FFT mag gyro
+                            fftExcelData.get(9).add(String.valueOf((double) 2 / N * complex.abs()));
+
+                            //FFT complex gyro
+                            fftExcelData.get(10).add(fft_complex);
+                        }
+                        //grav
+                        fft.beforeAfter(fft, re_grav, im_grav);
+                        for (int k = 0; k < re_grav.length; k++) {
+                            if (im_grav[k] > 0)
+                                fft_complex = String.valueOf(re_grav[k]) + "+" + String.valueOf(im_grav[k]) + "i";
+                            else if (im_grav[k] < 0)
+                                fft_complex = String.valueOf(re_grav[k]) + String.valueOf(im_grav[k]) + "i";
+                            else
+                                fft_complex = String.valueOf(re_grav[k]);
+
+                            //fft_complex_array.add(fft_complex);
+                            complex = new Complex(re_grav[k], im_grav[k]);
+
+                            //FFT mag grav
+                            fftExcelData.get(14).add(String.valueOf((double) 2 / N * complex.abs()));
+
+                            //FFT complex grav
+                            fftExcelData.get(15).add(fft_complex);
+                        }
+
+                        aux = 0;
+
+                        //acc
+                        re_acc = new double[N];
+                        im_acc = new double[N];
+
+                        //gyro
+                        re_gyro = new double[N];
+                        im_gyro = new double[N];
+
+                        //grav
+                        re_grav = new double[N];
+                        im_grav = new double[N];
+
+                    }
+
+                    //timestamp
+                    fftExcelData.get(0).add(rows.get(j)[3]);
+                    acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]), Double.parseDouble(rows.get(j)[5]), Double.parseDouble(rows.get(j)[6]));
+                    gyro_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[7]), Double.parseDouble(rows.get(j)[8]), Double.parseDouble(rows.get(j)[9]));
+                    grav_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[10]), Double.parseDouble(rows.get(j)[11]), Double.parseDouble(rows.get(j)[12]));
+
+                    //data_acc
+                    fftExcelData.get(1).add(String.valueOf(acc_sqrt));
+                    //data_gyro
+                    fftExcelData.get(6).add(String.valueOf(gyro_sqrt));
+                    //data_grav
+                    fftExcelData.get(11).add(String.valueOf(grav_sqrt));
+
+                    //FFT freq acc
+                    fftExcelData.get(2).add(String.valueOf((double) aux * 308 / N));
+                    //FFT freq gyro
+                    fftExcelData.get(7).add(String.valueOf((double) aux * 308 / N));
+                    //FFT freq grav
+                    fftExcelData.get(12).add(String.valueOf((double) aux * 308 / N));
+
+                    //serie acc
+                    fftExcelData.get(3).add(String.valueOf(aux));
+                    //serie gyro
+                    fftExcelData.get(8).add(String.valueOf(aux));
+                    //serie grav
+                    fftExcelData.get(13).add(String.valueOf(aux));
+
+
+                    fftExcelData.get(16).add(String.valueOf(CICLICAL_ACTIVITIES[a]));
+
+                    re_acc[aux] = acc_sqrt;
+                    im_acc[aux] = 0;
+
+                    re_gyro[aux] = gyro_sqrt;
+                    im_gyro[aux] = 0;
+
+                    re_grav[aux] = grav_sqrt;
+                    im_grav[aux] = 0;
+                    aux++;
+                    x++;
+                }
+            }
+
+            //remove exceeded elements
+            int size = timestamp.size();
+            if (aux < N + 1) {
+                for (int j = 1; j < aux + 1; j++) {
+                    timestamp.remove(size - j);
+                    data_acc.remove(size - j);
+                    data_gyro.remove(size - j);
+                    data_grav.remove(size - j);
+                    serie_acc.remove(size - j);
+                    serie_gyro.remove(size - j);
+                    serie_grav.remove(size - j);
+                    fft_freq_acc.remove(size - j);
+                    fft_freq_gyro.remove(size - j);
+                    fft_freq_grav.remove(size - j);
+                    current_activity.remove(size - j);
+
+                }
+            }
+            //transpose
+            fftExcelData = utils.transpose(fftExcelData);
+
+            fileManager.createFile(context.getFilesDir() + "/" + FFTFILENAME, FFTFILEHEADER);
+            FileOutputStream outputStream;
+
+            try {
+                outputStream = context.openFileOutput(FFTFILENAME, Context.MODE_APPEND);
+                Iterator<List<String>> iter = fftExcelData.iterator();
+                while (iter.hasNext()) {
+                    Iterator<String> siter = iter.next().iterator();
+                    while (siter.hasNext()) {
+                        String s = siter.next() + ",";
+                        outputStream.write((s).getBytes());
+                    }
+                    outputStream.write(("\n").getBytes());
+                }
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 }

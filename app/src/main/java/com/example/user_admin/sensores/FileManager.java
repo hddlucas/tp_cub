@@ -79,14 +79,14 @@ public class FileManager {
      *
      * @param path For example: "D:\foo.xml"
      */
-    public static void createFile(String path) {
+    public static void createFile(String path,String fileHeader) {
         try {
             File file = new File(path);
             if (!file.exists()) {
-                String fileHeader = "lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_grav,y_grav,z_grav,lum,activity\n";
                 file.createNewFile();
                 FileOutputStream writer = new FileOutputStream(path);
-                writer.write((fileHeader).getBytes());
+                if(fileHeader!=null)
+                    writer.write((fileHeader).getBytes());
                 writer.close();
             }
         } catch (IOException e) {

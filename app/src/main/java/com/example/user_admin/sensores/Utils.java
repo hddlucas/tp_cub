@@ -254,6 +254,7 @@ public class Utils {
         CSV2Arff csv2Arff;
         fileManager = new FileManager(context);
         fileManager.deleteFile(ARFFCSVFILENAME);
+        fileManager.deleteFile(ARFFFILENAME);
         utils = new Utils(context);
         csv2Arff = new CSV2Arff(context);
 

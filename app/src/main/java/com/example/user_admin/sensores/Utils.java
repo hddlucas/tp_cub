@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.example.user_admin.sensores.MainActivity.ARFFCSVFILENAME;
 import static com.example.user_admin.sensores.MainActivity.ARFFFILENAME;
 import static com.example.user_admin.sensores.MainActivity.CICLICAL_ACTIVITIES;
 import static com.example.user_admin.sensores.MainActivity.FFTFILEHEADER;
@@ -224,17 +225,19 @@ public class Utils {
 
             fileManager.createFile(context.getFilesDir() + "/" + SENSORSDATAAVERAGEFILENAME,FILEHEADER);
             FileOutputStream outputStream;
-
+            String s="";
             try {
                 outputStream = context.openFileOutput(SENSORSDATAAVERAGEFILENAME, Context.MODE_APPEND);
                 Iterator<List<String>> iter = fftExcelData.iterator();
                 while (iter.hasNext()) {
                     Iterator<String> siter = iter.next().iterator();
+                    s="";
                     while (siter.hasNext()) {
-                        String s = siter.next() + ",";
-                        outputStream.write((s).getBytes());
+                        s+= siter.next() + ",";
                     }
-                    outputStream.write(("\n").getBytes());
+                    //remove last comma
+                    s = s.replace(s.substring(s.length()-1), "");
+                    outputStream.write((s+"\n").getBytes());
                 }
                 outputStream.close();
 
@@ -248,9 +251,11 @@ public class Utils {
     public void generateArffFile() {
         FileManager fileManager;
         Utils utils;
+        CSV2Arff csv2Arff;
         fileManager = new FileManager(context);
-        fileManager.deleteFile(ARFFFILENAME);
+        fileManager.deleteFile(ARFFCSVFILENAME);
         utils = new Utils(context);
+        csv2Arff = new CSV2Arff(context);
 
         List<String[]> rows = new ArrayList<>();
         try {
@@ -381,24 +386,29 @@ public class Utils {
                     auxCont++;
                 }
             }
-            fileManager.createFile(context.getFilesDir() + "/" + ARFFFILENAME,fileHeader);
+            fileManager.createFile(context.getFilesDir() + "/" + ARFFCSVFILENAME,fileHeader);
             FileOutputStream outputStream;
-
+            String s="";
             try {
-                outputStream = context.openFileOutput(ARFFFILENAME, Context.MODE_APPEND);
+                outputStream = context.openFileOutput(ARFFCSVFILENAME, Context.MODE_APPEND);
                 Iterator<List<String>> iter = dataArff.iterator();
                 while (iter.hasNext()) {
                     Iterator<String> siter = iter.next().iterator();
+                    s="";
                     while (siter.hasNext()) {
-                        String s = siter.next() + ",";
-                        outputStream.write((s).getBytes());
+                        s+= siter.next() + ",";
                     }
-                    outputStream.write(("\n").getBytes());
+                    //remove last comma
+                    s = s.replace(s.substring(s.length()-1), "");
+                    outputStream.write((s+"\n").getBytes());
                 }
                 outputStream.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            //Convert csv to arff file
+            csv2Arff.convertCSVtoArff(ARFFCSVFILENAME,ARFFFILENAME);
         }
     }
 
@@ -634,17 +644,19 @@ public class Utils {
 
             fileManager.createFile(context.getFilesDir() + "/" + FFTFILENAME, FFTFILEHEADER);
             FileOutputStream outputStream;
-
+            String s="";
             try {
                 outputStream = context.openFileOutput(FFTFILENAME, Context.MODE_APPEND);
                 Iterator<List<String>> iter = fftExcelData.iterator();
                 while (iter.hasNext()) {
                     Iterator<String> siter = iter.next().iterator();
+                    s="";
                     while (siter.hasNext()) {
-                        String s = siter.next() + ",";
-                        outputStream.write((s).getBytes());
+                        s+= siter.next() + ",";
                     }
-                    outputStream.write(("\n").getBytes());
+                    //remove last comma
+                    s = s.replace(s.substring(s.length()-1), "");
+                    outputStream.write((s+"\n").getBytes());
                 }
                 outputStream.close();
             } catch (Exception e) {

@@ -236,7 +236,7 @@ public class Utils {
                         s+= siter.next() + ",";
                     }
                     //remove last comma
-                    s = s.replace(s.substring(s.length()-1), "");
+                    s = s.substring(0, s.length() - 1);
                     outputStream.write((s+"\n").getBytes());
                 }
                 outputStream.close();
@@ -399,7 +399,7 @@ public class Utils {
                         s+= siter.next() + ",";
                     }
                     //remove last comma
-                    s = s.replace(s.substring(s.length()-1), "");
+                    s = s.substring(0, s.length() - 1);
                     outputStream.write((s+"\n").getBytes());
                 }
                 outputStream.close();
@@ -655,7 +655,7 @@ public class Utils {
                         s+= siter.next() + ",";
                     }
                     //remove last comma
-                    s = s.replace(s.substring(s.length()-1), "");
+                    s = s.substring(0, s.length() - 1);
                     outputStream.write((s+"\n").getBytes());
                 }
                 outputStream.close();

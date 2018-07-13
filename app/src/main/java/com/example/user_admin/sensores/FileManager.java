@@ -27,11 +27,11 @@ public class FileManager {
     private List<String[]> rows = new ArrayList<>();
     private Utils utils;
     private NoiseFilter noiseFilter;
-
+    private int N=64;
+    List<List<String>> fftExcelData = new ArrayList<List<String>>();
     public FileManager(Context context) {
         this.context = context;
         noiseFilter =new NoiseFilter(context);
-        utils= new Utils(context);
     }
 
     // This method will read data from internal storage file
@@ -59,32 +59,37 @@ public class FileManager {
 
     // This method will save data in internal storage file
     public void writeDataToFile(String filename, Float[] sensorsData,long timestamp,String activity) {
-
-
         FileOutputStream outputStream;
-        String [] collection_line= new String[sensorsData.length+1];
+        String [] collection_line= new String[sensorsData.length+2];
+        String [] media= new String[sensorsData.length+2];
+
         try {
             outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
             String x="";
             // append to file
+            int aux=0;
             for(int i=0;i<sensorsData.length;i++){
                 x+=sensorsData[i].toString() +",";
-                collection_line[i]=sensorsData[i].toString();
+                collection_line[aux]=sensorsData[i].toString();
                 if(i==2) {
+                    aux++;
                     x+=timestamp+",";
-                    collection_line[i]= String.valueOf(timestamp);
+                    collection_line[aux]= String.valueOf(timestamp);
                 }
+                aux++;
             }
 
             x+=activity+"\n";
-            collection_line[sensorsData.length]=activity;
+            collection_line[aux]=activity;
             outputStream.write(x.getBytes());
             x=null;
 
-//            rows.add(collection_line);
-//            if(rows.size()==64) {
-//                rows = new ArrayList<>();
-//            }
+            rows.add(collection_line);
+            if(rows.size()==N) {
+                //appply noise filter
+                media = noiseFilter.ApplyNoiseFilter(rows,aux);
+                rows = new ArrayList<>();
+            }
 
             outputStream.close();
 

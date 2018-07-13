@@ -203,50 +203,9 @@ public class NoiseFilter {
         long time = System.currentTimeMillis();
     }
 
-    public List<String[]> ApplyNoiseFilter(List<String[]> rows){
+    public String[] ApplyNoiseFilter(List<String[]> rows,int sensorsDataLength){
         int N=64;
-        List<List<String>> fftExcelData = new ArrayList<List<String>>();
-        List<String> lat = new ArrayList<String>();
-        List<String> lng = new ArrayList<String>();
-        List<String> alt = new ArrayList<String>();
-
-        List<String> timestamp = new ArrayList<String>();
-
-        List<String> x_acc = new ArrayList<String>();
-        List<String> y_acc = new ArrayList<String>();
-        List<String> z_acc = new ArrayList<String>();
-
-        List<String> x_gyro = new ArrayList<String>();
-        List<String> y_gyro = new ArrayList<String>();
-        List<String> z_gyro = new ArrayList<String>();
-
-        List<String> x_grav = new ArrayList<String>();
-        List<String> y_grav = new ArrayList<String>();
-        List<String> z_grav = new ArrayList<String>();
-        List<String> lum = new ArrayList<String>();
-        List<String> current_activity = new ArrayList<String>();
-
-        fftExcelData.add(lat);
-        fftExcelData.add(lng);
-        fftExcelData.add(alt);
-
-        fftExcelData.add(timestamp);
-
-        fftExcelData.add(x_acc);
-        fftExcelData.add(y_acc);
-        fftExcelData.add(z_acc);
-
-        fftExcelData.add(x_gyro);
-        fftExcelData.add(y_gyro);
-        fftExcelData.add(z_gyro);
-
-        fftExcelData.add(x_grav);
-        fftExcelData.add(y_grav);
-        fftExcelData.add(z_grav);
-
-        fftExcelData.add(lum);
-        fftExcelData.add(current_activity);
-
+        String[]media = new String[sensorsDataLength+1];
         double media_lat = 0.0,
                 media_lng = 0.0,
                 media_alt = 0.0,
@@ -263,45 +222,30 @@ public class NoiseFilter {
                 media_z_grav = 0.0,
                 media_lum = 0.0;
 
-        int aux = 0;
+        for (int j = 0; j < rows.size(); j++) {
+            if (j == N-1) {
+                media[0]=Double.toString(media_lat / N);
+                media[1]=Double.toString(media_lng / N);
+                media[2]=Double.toString(media_alt / N);
 
-        for (int j = 0, x = 0; j < rows.size(); j++) {
-            if (x != 0 && x % N == 0) {
-                fftExcelData.get(0).add(Double.toString(media_lat / N));
-                fftExcelData.get(1).add(Double.toString(media_lng / N));
-                fftExcelData.get(2).add(Double.toString(media_alt / N));
+                media[3]=rows.get(j)[3];
 
-                fftExcelData.get(3).add(rows.get(j)[3]);
+                media[4]=Double.toString(media_x_acc / N);
+                media[5]=Double.toString(media_y_acc / N);
+                media[6]=Double.toString(media_z_acc / N);
 
-                fftExcelData.get(4).add(Double.toString(media_x_acc / N));
-                fftExcelData.get(5).add(Double.toString(media_y_acc / N));
-                fftExcelData.get(6).add(Double.toString(media_z_acc / N));
+                media[7]=Double.toString(media_x_gyro / N);
+                media[8]=Double.toString(media_y_gyro / N);
+                media[9]=Double.toString(media_z_gyro / N);
 
-                fftExcelData.get(7).add(Double.toString(media_x_gyro / N));
-                fftExcelData.get(8).add(Double.toString(media_y_gyro / N));
-                fftExcelData.get(9).add(Double.toString(media_z_gyro / N));
+                media[10]=Double.toString(media_x_grav / N);
+                media[11]=Double.toString(media_y_grav / N);
+                media[12]=Double.toString(media_z_grav / N);
 
-                fftExcelData.get(10).add(Double.toString(media_x_grav / N));
-                fftExcelData.get(11).add(Double.toString(media_y_grav / N));
-                fftExcelData.get(12).add(Double.toString(media_z_grav / N));
+                media[13]=Double.toString(media_lum / N);
+                media[14]=rows.get(j)[14];
 
-                fftExcelData.get(13).add(Double.toString(media_lum / N));
-                fftExcelData.get(14).add(rows.get(j)[14]);
-
-                media_lat = 0.0;
-                media_lng = 0.0;
-                media_alt = 0.0;
-                media_timestamp = 0.0;
-                media_x_acc = 0.0;
-                media_y_acc = 0.0;
-                media_z_acc = 0.0;
-                media_x_gyro = 0.0;
-                media_y_gyro = 0.0;
-                media_z_gyro = 0.0;
-                media_x_grav = 0.0;
-                media_y_grav = 0.0;
-                media_z_grav = 0.0;
-                media_lum = 0.0;
+                return media;
             }
 
             media_lat += Double.parseDouble(rows.get(j)[0]);
@@ -320,9 +264,8 @@ public class NoiseFilter {
             media_y_grav += Double.parseDouble(rows.get(j)[11]);
             media_z_grav += Double.parseDouble(rows.get(j)[12]);
             media_lum += Double.parseDouble(rows.get(j)[13]);
-            x++;
         }
-        return rows;
+        return media;
     }
 
 }

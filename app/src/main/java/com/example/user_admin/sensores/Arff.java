@@ -23,6 +23,8 @@ public class Arff {
 
     private Utils utils;
     private Context context;
+    private FileManager fileManager;
+
     public Arff(Context context) {
         this.context = context;
     }
@@ -54,9 +56,9 @@ public class Arff {
     }
 
     public void generateArffFile(boolean filter_noise) {
-        FileManager fileManager;
-        Arff arff;
+        utils = new Utils(context);
         fileManager = new FileManager(context);
+
         if(!filter_noise) {
             fileManager.deleteFile(ARFFCSVFILENAME);
             fileManager.deleteFile(ARFFFILENAME);
@@ -65,10 +67,8 @@ public class Arff {
             fileManager.deleteFile(FILTERED_NOISE_ARFFCSVFILENAME);
             fileManager.deleteFile(FILTERED_NOISE_ARFFFILENAME);
         }
-        utils = new Utils(context);
-        arff = new Arff(context);
-        String filename= filter_noise== false ? "treino.csv" : "avg.csv";
 
+        String filename= filter_noise== false ? "treino.csv" : "avg.csv";
         List<String[]> rows = new ArrayList<>();
         try {
             FileManager csvReader = new FileManager(context);
@@ -220,7 +220,7 @@ public class Arff {
             }
 
             //Convert csv to arff file
-            arff.convertCSVtoArff((filter_noise== true ? FILTERED_NOISE_ARFFCSVFILENAME : ARFFCSVFILENAME),(filter_noise== true ? FILTERED_NOISE_ARFFFILENAME : ARFFFILENAME));
+            convertCSVtoArff((filter_noise== true ? FILTERED_NOISE_ARFFCSVFILENAME : ARFFCSVFILENAME),(filter_noise== true ? FILTERED_NOISE_ARFFFILENAME : ARFFFILENAME));
         }
     }
 

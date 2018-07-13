@@ -78,14 +78,15 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        utils = new Utils(this.getApplicationContext());
-        fft = new FFT(this.getApplicationContext());
-        arff = new Arff(this.getApplicationContext());
-        noiseFilter = new NoiseFilter(this.getApplicationContext());
 
-        //only for test
+        //uncomment to generate offline files for use in WEKA
+        //fft = new FFT(this.getApplicationContext());
         //fft.generateFourierTransform(true);
-        //arff.generateArffFile(false);
+
+        //arff = new Arff(this.getApplicationContext());
+        //arff.generateArffFile(true);
+
+        //noiseFilter = new NoiseFilter(this.getApplicationContext());
         //noiseFilter.calculateAverage();
 
         //find elements on view

@@ -25,9 +25,13 @@ public class FileManager {
 
     public Context context;
     private List<String[]> rows = new ArrayList<>();
-    Utils utils;
+    private Utils utils;
+    private NoiseFilter noiseFilter;
+
     public FileManager(Context context) {
         this.context = context;
+        noiseFilter =new NoiseFilter(context);
+        utils= new Utils(context);
     }
 
     // This method will read data from internal storage file
@@ -55,10 +59,9 @@ public class FileManager {
 
     // This method will save data in internal storage file
     public void writeDataToFile(String filename, Float[] sensorsData,long timestamp,String activity) {
-        utils = new Utils(context);
+
 
         FileOutputStream outputStream;
-
         String [] collection_line= new String[sensorsData.length+1];
         try {
             outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
@@ -77,7 +80,11 @@ public class FileManager {
             collection_line[sensorsData.length]=activity;
             outputStream.write(x.getBytes());
             x=null;
-           
+
+//            rows.add(collection_line);
+//            if(rows.size()==64) {
+//                rows = new ArrayList<>();
+//            }
 
             outputStream.close();
 

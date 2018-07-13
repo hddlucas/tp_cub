@@ -41,7 +41,6 @@ public class FFT {
     private Complex complex;
     private Utils utils;
     private Context context;
-    FileManager csvReader = new FileManager(this.context);
 
     public FFT(Context context) {
         this.context = context;
@@ -193,20 +192,16 @@ public class FFT {
     }
 
     public void generateFourierTransform(boolean filter_noise) {
+        utils = new Utils(context);
         fileManager = new FileManager(context);
         if(!filter_noise)
             fileManager.deleteFile(FFTFILENAME);
         else
             fileManager.deleteFile(FILTERED_NOISE_FFTFILENAME);
-
-        utils = new Utils(context);
         List<String[]> rows = new ArrayList<>();
-
         String filename= filter_noise== false ? "treino.csv" : "avg.csv";
         try {
-            FileManager csvReader = new FileManager(context);
-            rows = csvReader.readCSV(filename);
-
+            rows = fileManager.readCSV(filename);
         } catch (IOException e) {
             e.printStackTrace();
         }

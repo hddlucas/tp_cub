@@ -22,22 +22,21 @@ public class NoiseFilter {
     private FileManager fileManager;
     private Complex complex;
     private Utils utils;
+    private Arff arff;
     private Context context;
+
     public NoiseFilter(Context context) {
         this.context = context;
     }
 
     public void calculateAverage(){
-        fileManager = new FileManager(context);
-        fileManager.deleteFile(SENSORSDATAAVERAGEFILENAME);
-        utils = new Utils(context);
-        List<String[]> rows = new ArrayList<>();
-        Arff arff;
         arff = new Arff(context);
-
+        fileManager = new FileManager(context);
+        utils= new Utils(context);
+        fileManager.deleteFile(SENSORSDATAAVERAGEFILENAME);
+        List<String[]> rows = new ArrayList<>();
         try {
-            FileManager csvReader = new FileManager(context);
-            rows = csvReader.readCSV("treino.csv");
+            rows = fileManager.readCSV("treino.csv");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -248,7 +247,6 @@ public class NoiseFilter {
         fftExcelData.add(lum);
         fftExcelData.add(current_activity);
 
-
         double media_lat = 0.0,
                 media_lng = 0.0,
                 media_alt = 0.0,
@@ -324,7 +322,6 @@ public class NoiseFilter {
             media_lum += Double.parseDouble(rows.get(j)[13]);
             x++;
         }
-
         return rows;
     }
 

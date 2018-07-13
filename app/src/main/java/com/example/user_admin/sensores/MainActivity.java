@@ -54,12 +54,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
     public static final String SENSORSDATAAVERAGEFILENAME = "average.csv";
+    public static final String ARFFSENSORSDATAAVERAGEFILENAME = "average.arff";
     public static final String ARFFCSVFILENAME = "arff.csv";
     public static final String ARFFFILENAME = "arff.arff";
     public static final String FFTFILENAME = "fft.csv";
     public static final String FILEHEADER = "lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_grav,y_grav,z_grav,lum,activity\n";
     public static final String FFTFILEHEADER = "Time,Data ACC,FFT freq ACC,Serie,FFT mag ACC,FFT Complex ACC,Data GYRO,FFT freq GYRO,Serie,FFT mag GYRO,FFT Complex GYRO,Data GRAV,FFT freq GRAV,Serie,FFT mag GRAV,FFT Complex GRAV,Activity\n";
-    public static final String[] CICLICAL_ACTIVITIES = new String[]{"WALKING","RUNNING","DRIVING"};
+    public static final String[] ACTIVITIES = new String[]{"WALKING","RUNNING","DRIVING","GO_UPSTAIRS","GO_DOWNSTAIRS"};
 
 
     public static final int COLLECTIONTIMEINTERVAL = 500; // Collection time interval i.e 125 = 8 per sec

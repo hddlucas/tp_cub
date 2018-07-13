@@ -13,9 +13,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.example.user_admin.sensores.MainActivity.ACTIVITIES;
 import static com.example.user_admin.sensores.MainActivity.ARFFCSVFILENAME;
 import static com.example.user_admin.sensores.MainActivity.ARFFFILENAME;
-import static com.example.user_admin.sensores.MainActivity.CICLICAL_ACTIVITIES;
+import static com.example.user_admin.sensores.MainActivity.ARFFSENSORSDATAAVERAGEFILENAME;
 import static com.example.user_admin.sensores.MainActivity.FFTFILEHEADER;
 import static com.example.user_admin.sensores.MainActivity.FFTFILENAME;
 import static com.example.user_admin.sensores.MainActivity.FILEHEADER;
@@ -80,6 +81,8 @@ public class Utils {
         fileManager.deleteFile(SENSORSDATAAVERAGEFILENAME);
         utils = new Utils(context);
         List<String[]> rows = new ArrayList<>();
+        CSV2Arff csv2Arff;
+        csv2Arff = new CSV2Arff(context);
 
         try {
             FileManager csvReader = new FileManager(context);
@@ -90,8 +93,7 @@ public class Utils {
         }
 
         int N = 64;
-        String[] activities = new String[]{"WALKING","DRIVING","RUNNING","GO_UPSTAIRS","GO_DOWNSTAIRS"};
-        for (int a = 0; a < activities.length; a++) {
+        for (int a = 0; a < ACTIVITIES.length; a++) {
 
             List<List<String>> fftExcelData = new ArrayList<List<String>>();
 
@@ -160,7 +162,7 @@ public class Utils {
                 if (j + N > rows.size())
                     break;
 
-                if (rows.get(j)[14].equals(activities[a])) {
+                if (rows.get(j)[14].equals(ACTIVITIES[a])) {
                     if (x != 0 && x % N == 0) {
 
                         fftExcelData.get(0).add(Double.toString(media_lat / N));
@@ -182,7 +184,7 @@ public class Utils {
                         fftExcelData.get(12).add(Double.toString(media_z_grav / N));
 
                         fftExcelData.get(13).add(Double.toString(media_lum / N));
-                        fftExcelData.get(14).add(activities[a]);
+                        fftExcelData.get(14).add(ACTIVITIES[a]);
 
                         media_lat = 0.0;
                         media_lng = 0.0;
@@ -244,6 +246,9 @@ public class Utils {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            //Convert csv to arff file
+            csv2Arff.convertCSVtoArff(SENSORSDATAAVERAGEFILENAME,ARFFSENSORSDATAAVERAGEFILENAME);
         }
         long time = System.currentTimeMillis();
     }
@@ -283,7 +288,7 @@ public class Utils {
         fileHeader += ("activity\n");
 
         double acc_sqrt, gyro_sqrt, grav_sqrt;
-        for (int a = 0; a < CICLICAL_ACTIVITIES.length; a++) {
+        for (int a = 0; a < ACTIVITIES.length; a++) {
             String fft_complex = "";
             double[] window = fft.getWindow();
             //acc
@@ -309,7 +314,7 @@ public class Utils {
             for (int j = 0, x = 0; j < rows.size(); j++) {
                 if (j + N > rows.size())
                     break;
-                if (rows.get(j)[14].equals(CICLICAL_ACTIVITIES[a])) {
+                if (rows.get(j)[14].equals(ACTIVITIES[a])) {
                     if (x != 0 && x % N == 0) {
                         //acc
                         fft.beforeAfter(fft, re_acc, im_acc);
@@ -377,12 +382,12 @@ public class Utils {
             for (int y = 0; y < fftExcelData.get(0).size(); y++) {
                 if ((N + aux2) <= fftExcelData.get(0).size()) {
                     dataArff.add(new ArrayList<String>());
-                    for (int l = 0; l < CICLICAL_ACTIVITIES.length; l++) {
+                    for (int l = 0; l < 3; l++) {
                         for (int k = 0; k < N; k++) {
                             dataArff.get(auxCont).add(fftExcelData.get(l).get(k + aux2));
                         }
                     }
-                    dataArff.get(auxCont).add(CICLICAL_ACTIVITIES[a]);
+                    dataArff.get(auxCont).add(ACTIVITIES[a]);
                     aux2 += N;
                     auxCont++;
                 }
@@ -433,7 +438,7 @@ public class Utils {
         int N = 64;
         FFT fft = new FFT(N);
 
-        for (int a = 0; a < CICLICAL_ACTIVITIES.length; a++) {
+        for (int a = 0; a < ACTIVITIES.length; a++) {
             double[] window = fft.getWindow();
 
             //acc
@@ -503,7 +508,7 @@ public class Utils {
                 if (j + N > rows.size())
                     break;
 
-                if (rows.get(j)[14].equals(CICLICAL_ACTIVITIES[a])) {
+                if (rows.get(j)[14].equals(ACTIVITIES[a])) {
                     if (x != 0 && x % N == 0) {
                         //acc
                         fft.beforeAfter(fft, re_acc, im_acc);
@@ -607,7 +612,7 @@ public class Utils {
                     fftExcelData.get(13).add(String.valueOf(aux));
 
 
-                    fftExcelData.get(16).add(String.valueOf(CICLICAL_ACTIVITIES[a]));
+                    fftExcelData.get(16).add(String.valueOf(ACTIVITIES[a]));
 
                     re_acc[aux] = acc_sqrt;
                     im_acc[aux] = 0;

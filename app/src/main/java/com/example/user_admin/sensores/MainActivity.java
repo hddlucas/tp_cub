@@ -56,8 +56,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     public static final String SENSORSDATAAVERAGEFILENAME = "average.csv";
     public static final String ARFFSENSORSDATAAVERAGEFILENAME = "average.arff";
     public static final String ARFFCSVFILENAME = "arff.csv";
+    public static final String FILTERED_NOISE_ARFFCSVFILENAME = "filtered_noise_arff.csv";
+    public static final String FILTERED_NOISE_ARFFFILENAME = "filtered_noise_arff.arff";
     public static final String ARFFFILENAME = "arff.arff";
     public static final String FFTFILENAME = "fft.csv";
+    public static final String FILTERED_NOISE_FFTFILENAME = "filtered_noise_fft.csv";
     public static final String FILEHEADER = "lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_grav,y_grav,z_grav,lum,activity\n";
     public static final String FFTFILEHEADER = "Time,Data ACC,FFT freq ACC,Serie,FFT mag ACC,FFT Complex ACC,Data GYRO,FFT freq GYRO,Serie,FFT mag GYRO,FFT Complex GYRO,Data GRAV,FFT freq GRAV,Serie,FFT mag GRAV,FFT Complex GRAV,Activity\n";
     public static final String[] ACTIVITIES = new String[]{"WALKING","RUNNING","DRIVING","GO_UPSTAIRS","GO_DOWNSTAIRS"};
@@ -81,9 +84,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         setContentView(R.layout.activity_main);
         utils = new Utils(this.getApplicationContext());
         //only for test
-        //utils.generateFourierTransform();
-        //utils.generateArffFile();
-        //utils.calculateAverage();
+        //utils.generateFourierTransform(false);
+        //utils.generateArffFile(false);
+        utils.calculateAverage();
 
         //find elements on view
         startBtn = (Button) findViewById(R.id.startBtn);

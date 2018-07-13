@@ -20,6 +20,9 @@ import static com.example.user_admin.sensores.MainActivity.ARFFSENSORSDATAAVERAG
 import static com.example.user_admin.sensores.MainActivity.FFTFILEHEADER;
 import static com.example.user_admin.sensores.MainActivity.FFTFILENAME;
 import static com.example.user_admin.sensores.MainActivity.FILEHEADER;
+import static com.example.user_admin.sensores.MainActivity.FILTERED_NOISE_ARFFCSVFILENAME;
+import static com.example.user_admin.sensores.MainActivity.FILTERED_NOISE_ARFFFILENAME;
+import static com.example.user_admin.sensores.MainActivity.FILTERED_NOISE_FFTFILENAME;
 import static com.example.user_admin.sensores.MainActivity.SENSORSDATAAVERAGEFILENAME;
 
 /**
@@ -253,20 +256,27 @@ public class Utils {
         long time = System.currentTimeMillis();
     }
 
-    public void generateArffFile() {
+    public void generateArffFile(boolean filter_noise) {
         FileManager fileManager;
         Utils utils;
         CSV2Arff csv2Arff;
         fileManager = new FileManager(context);
-        fileManager.deleteFile(ARFFCSVFILENAME);
-        fileManager.deleteFile(ARFFFILENAME);
+        if(!filter_noise) {
+            fileManager.deleteFile(ARFFCSVFILENAME);
+            fileManager.deleteFile(ARFFFILENAME);
+        }
+        else{
+            fileManager.deleteFile(FILTERED_NOISE_ARFFCSVFILENAME);
+            fileManager.deleteFile(FILTERED_NOISE_ARFFFILENAME);
+        }
         utils = new Utils(context);
         csv2Arff = new CSV2Arff(context);
+        String filename= filter_noise== false ? "treino.csv" : "avg.csv";
 
         List<String[]> rows = new ArrayList<>();
         try {
             FileManager csvReader = new FileManager(context);
-            rows = csvReader.readCSV("treino.csv");
+            rows = csvReader.readCSV(filename);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -392,11 +402,11 @@ public class Utils {
                     auxCont++;
                 }
             }
-            fileManager.createFile(context.getFilesDir() + "/" + ARFFCSVFILENAME,fileHeader);
+            fileManager.createFile(context.getFilesDir() + "/" + (filter_noise== true ? FILTERED_NOISE_ARFFCSVFILENAME : ARFFCSVFILENAME),fileHeader);
             FileOutputStream outputStream;
             String s="";
             try {
-                outputStream = context.openFileOutput(ARFFCSVFILENAME, Context.MODE_APPEND);
+                outputStream = context.openFileOutput((filter_noise== true ? FILTERED_NOISE_ARFFCSVFILENAME : ARFFCSVFILENAME), Context.MODE_APPEND);
                 Iterator<List<String>> iter = dataArff.iterator();
                 while (iter.hasNext()) {
                     Iterator<String> siter = iter.next().iterator();
@@ -414,22 +424,27 @@ public class Utils {
             }
 
             //Convert csv to arff file
-            csv2Arff.convertCSVtoArff(ARFFCSVFILENAME,ARFFFILENAME);
+            csv2Arff.convertCSVtoArff((filter_noise== true ? FILTERED_NOISE_ARFFCSVFILENAME : ARFFCSVFILENAME),(filter_noise== true ? FILTERED_NOISE_ARFFFILENAME : ARFFFILENAME));
         }
     }
 
-    public void generateFourierTransform() {
+    public void generateFourierTransform(boolean filter_noise) {
         FileManager fileManager;
         Complex complex;
         Utils utils;
         fileManager = new FileManager(context);
-        fileManager.deleteFile(FFTFILENAME);
+        if(!filter_noise)
+            fileManager.deleteFile(FFTFILENAME);
+        else
+            fileManager.deleteFile(FILTERED_NOISE_FFTFILENAME);
+
         utils = new Utils(context);
         List<String[]> rows = new ArrayList<>();
 
+        String filename= filter_noise== false ? "treino.csv" : "avg.csv";
         try {
             FileManager csvReader = new FileManager(context);
-            rows = csvReader.readCSV("treino.csv");
+            rows = csvReader.readCSV(filename);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -648,11 +663,11 @@ public class Utils {
             //transpose
             fftExcelData = utils.transpose(fftExcelData);
 
-            fileManager.createFile(context.getFilesDir() + "/" + FFTFILENAME, FFTFILEHEADER);
+            fileManager.createFile(context.getFilesDir() + "/" + (filter_noise== true ? FILTERED_NOISE_FFTFILENAME : FFTFILENAME), FFTFILEHEADER);
             FileOutputStream outputStream;
             String s="";
             try {
-                outputStream = context.openFileOutput(FFTFILENAME, Context.MODE_APPEND);
+                outputStream = context.openFileOutput((filter_noise== true ? FILTERED_NOISE_FFTFILENAME : FFTFILENAME), Context.MODE_APPEND);
                 Iterator<List<String>> iter = fftExcelData.iterator();
                 while (iter.hasNext()) {
                     Iterator<String> siter = iter.next().iterator();

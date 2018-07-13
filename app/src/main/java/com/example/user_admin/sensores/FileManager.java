@@ -13,6 +13,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.user_admin.sensores.MainActivity.FFTFILENAME;
+import static com.example.user_admin.sensores.MainActivity.FILTERED_NOISE_FFTFILENAME;
+
 
 /**
  * Created by USER-Admin on 24/03/2018.
@@ -21,7 +24,8 @@ import java.util.List;
 public class FileManager {
 
     public Context context;
-
+    private List<String[]> rows = new ArrayList<>();
+    Utils utils;
     public FileManager(Context context) {
         this.context = context;
     }
@@ -51,27 +55,36 @@ public class FileManager {
 
     // This method will save data in internal storage file
     public void writeDataToFile(String filename, Float[] sensorsData,long timestamp,String activity) {
+        utils = new Utils(context);
+
         FileOutputStream outputStream;
 
+        String [] collection_line= new String[sensorsData.length+1];
         try {
             outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
             String x="";
             // append to file
             for(int i=0;i<sensorsData.length;i++){
                 x+=sensorsData[i].toString() +",";
+                collection_line[i]=sensorsData[i].toString();
                 if(i==2) {
                     x+=timestamp+",";
+                    collection_line[i]= String.valueOf(timestamp);
                 }
             }
 
             x+=activity+"\n";
+            collection_line[sensorsData.length]=activity;
             outputStream.write(x.getBytes());
             x=null;
+           
 
             outputStream.close();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     /**

@@ -17,12 +17,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
 
 import static android.util.Half.EPSILON;
 import static java.lang.Math.cos;
@@ -32,12 +27,13 @@ import static java.lang.StrictMath.sqrt;
 public class MainActivity extends Activity implements LocationListener, SensorEventListener {
     //Classes
     GPSTracker gps;
-    AccelerometerTracker acc;
     FileManager fileManager;
     Permissions permissions;
-    Complex complex;
     Utils utils;
-    SFTP sftp;
+    FFT fft;
+    Arff arff;
+    NoiseFilter noiseFilter;
+
     SensorsManager<MainActivity> sensorsManager;
 
     private float lastX, lastY, lastZ;
@@ -83,10 +79,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         utils = new Utils(this.getApplicationContext());
+        fft = new FFT(this.getApplicationContext());
+        arff = new Arff(this.getApplicationContext());
+        noiseFilter = new NoiseFilter(this.getApplicationContext());
+
         //only for test
-        //utils.generateFourierTransform(false);
-        //utils.generateArffFile(false);
-        utils.calculateAverage();
+        //fft.generateFourierTransform(true);
+        //arff.generateArffFile(false);
+        //noiseFilter.calculateAverage();
 
         //find elements on view
         startBtn = (Button) findViewById(R.id.startBtn);

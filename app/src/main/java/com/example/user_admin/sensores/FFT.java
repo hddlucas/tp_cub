@@ -191,6 +191,99 @@ public class FFT {
         System.out.println("]");
     }
 
+    public ArrayList<List<String>> applyFourrierTransform(List<String[]> rows){
+        utils = new Utils(context);
+        ArrayList<List<String>> outer = new ArrayList<>();
+
+        int N = 64;
+        FFT fft = new FFT(N);
+
+        double acc_sqrt, gyro_sqrt, grav_sqrt;
+        String fft_complex = "";
+        double[] window = fft.getWindow();
+        //acc
+        double[] re_acc = new double[N];
+        double[] im_acc = new double[N];
+        //gyro
+        double[] re_gyro = new double[N];
+        double[] im_gyro = new double[N];
+        //grav
+        double[] re_grav = new double[N];
+        double[] im_grav = new double[N];
+        List<List<String>> fftExcelData = new ArrayList<List<String>>();
+        List<String> accValues = new ArrayList<String>();
+        List<String> gyroValues = new ArrayList<String>();
+        List<String> gravValues = new ArrayList<String>();
+
+        //lines for sensors
+        fftExcelData.add(accValues);
+        fftExcelData.add(gyroValues);
+        fftExcelData.add(gravValues);
+
+        int aux = 0;
+        for (int j = 0, x = 0; j < rows.size(); j++) {
+            if (j == N-1) {
+                //acc
+                fft.beforeAfter(fft, re_acc, im_acc);
+                for (int k = 0; k < re_acc.length; k++) {
+                    fft_complex = String.valueOf(re_acc[k]);
+                    //FFT complex acc
+                    fftExcelData.get(0).add(fft_complex);
+                }
+                //gyro
+                fft.beforeAfter(fft, re_gyro, im_gyro);
+                for (int k = 0; k < re_gyro.length; k++) {
+                    fft_complex = String.valueOf(re_gyro[k]);
+
+                    //FFT mag gyro
+                    fftExcelData.get(1).add(fft_complex);
+                }
+                //grav
+                fft.beforeAfter(fft, re_grav, im_grav);
+                for (int k = 0; k < re_grav.length; k++) {
+                    fft_complex = String.valueOf(re_grav[k]);
+
+                    //FFT complex
+                    fftExcelData.get(2).add(fft_complex);
+                }
+                aux = 0;
+                //acc
+                re_acc = new double[N];
+                im_acc = new double[N];
+
+                //gyro
+                re_gyro = new double[N];
+                im_gyro = new double[N];
+
+                //grav
+                re_grav = new double[N];
+                im_grav = new double[N];
+            }
+
+            acc_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[4]), Double.parseDouble(rows.get(j)[5]), Double.parseDouble(rows.get(j)[6]));
+            gyro_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[7]), Double.parseDouble(rows.get(j)[8]), Double.parseDouble(rows.get(j)[9]));
+            grav_sqrt = utils.calculateAngularVelocity(Double.parseDouble(rows.get(j)[10]), Double.parseDouble(rows.get(j)[11]), Double.parseDouble(rows.get(j)[12]));
+
+            re_acc[aux] = acc_sqrt;
+            im_acc[aux] = 0;
+
+            re_gyro[aux] = gyro_sqrt;
+            im_gyro[aux] = 0;
+
+            re_grav[aux] = grav_sqrt;
+            im_grav[aux] = 0;
+            aux++;
+            x++;
+
+        }
+        outer.add(accValues);
+        outer.add(gyroValues);
+        outer.add(gravValues);
+
+        return outer;
+    }
+
+
     public void generateFourierTransform(boolean filter_noise) {
         utils = new Utils(context);
         fileManager = new FileManager(context);

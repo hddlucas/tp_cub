@@ -8,7 +8,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.example.user_admin.sensores.MainActivity.FFTFILENAME;
+import static com.example.user_admin.sensores.MainActivity.FILTERED_NOISE_FFTFILENAME;
 
 
 /**
@@ -17,8 +24,7 @@ import java.io.InputStreamReader;
 
 public class FileManager {
 
-    private Context context;
-
+    public Context context;
     public FileManager(Context context) {
         this.context = context;
     }
@@ -49,7 +55,7 @@ public class FileManager {
     // This method will save data in internal storage file
     public void writeDataToFile(String filename, Float[] sensorsData,long timestamp,String activity) {
         FileOutputStream outputStream;
-
+        String [] collection_line= new String[sensorsData.length+2];
         try {
             outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
             String x="";
@@ -66,6 +72,7 @@ public class FileManager {
             x=null;
 
             outputStream.close();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -76,14 +83,14 @@ public class FileManager {
      *
      * @param path For example: "D:\foo.xml"
      */
-    public static void createFile(String path) {
+    public static void createFile(String path,String fileHeader) {
         try {
             File file = new File(path);
             if (!file.exists()) {
-                String fileHeader = "lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_grav,y_grav,z_grav,lum,activity\n";
                 file.createNewFile();
                 FileOutputStream writer = new FileOutputStream(path);
-                writer.write((fileHeader).getBytes());
+                if(fileHeader!=null)
+                    writer.write((fileHeader).getBytes());
                 writer.close();
             }
         } catch (IOException e) {
@@ -99,6 +106,23 @@ public class FileManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public  List<String[]> readCSV(String fileName) throws IOException {
+        List<String[]> rows = new ArrayList<>();
+        InputStream is = context.getAssets().open(fileName);
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr);
+        String line;
+        String csvSplitBy = ";";
+
+        br.readLine();
+
+        while ((line = br.readLine()) != null) {
+            String[] row = line.split(csvSplitBy);
+            rows.add(row);
+        }
+        return rows;
     }
 
 }

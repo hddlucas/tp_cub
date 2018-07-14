@@ -15,11 +15,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.Timer;
 
 import static android.util.Half.EPSILON;
 import static java.lang.Math.cos;
@@ -27,25 +25,22 @@ import static java.lang.Math.sin;
 import static java.lang.StrictMath.sqrt;
 
 public class MainActivity extends Activity implements LocationListener, SensorEventListener {
-
     //Classes
     GPSTracker gps;
-    AccelerometerTracker acc;
     FileManager fileManager;
     Permissions permissions;
     Utils utils;
-    SFTP sftp;
+    FFT fft;
+    Arff arff;
+    NoiseFilter noiseFilter;
+
     SensorsManager<MainActivity> sensorsManager;
 
     private float lastX, lastY, lastZ;
-
     private float deltaXMax = 0;
-    private float deltaYMax = 0;
     private float deltaZMax = 0;
     private float timestamp;
     private final float[] deltaRotationVector = new float[4];
-
-
     private SensorManager sensorManager;
 
     //variables
@@ -54,6 +49,21 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
+    public static final String SENSORSDATAAVERAGEFILENAME = "average.csv";
+    public static final String ARFFSENSORSDATAAVERAGEFILENAME = "average.arff";
+    public static final String ARFFCSVFILENAME = "arff.csv";
+    public static final String REALTIMEARFFCSVFILENAME = "real_time_arff.csv";
+    public static final String FILTERED_NOISE_ARFFCSVFILENAME = "filtered_noise_arff.csv";
+    public static final String FILTERED_NOISE_ARFFFILENAME = "filtered_noise_arff.arff";
+    public static final String ARFFFILENAME = "arff.arff";
+    public static final String REALTIMEARFFFILENAME = "real_time_arff.arff";
+    public static final String FFTFILENAME = "fft.csv";
+    public static final String FILTERED_NOISE_FFTFILENAME = "filtered_noise_fft.csv";
+    public static final String FILEHEADER = "lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_grav,y_grav,z_grav,lum,activity\n";
+    public static final String FFTFILEHEADER = "Time,Data ACC,FFT freq ACC,Serie,FFT mag ACC,FFT Complex ACC,Data GYRO,FFT freq GYRO,Serie,FFT mag GYRO,FFT Complex GYRO,Data GRAV,FFT freq GRAV,Serie,FFT mag GRAV,FFT Complex GRAV,Activity\n";
+    public static final String[] ACTIVITIES = new String[]{"WALKING","RUNNING","DRIVING","GO_UPSTAIRS","GO_DOWNSTAIRS"};
+
+
     public static final int COLLECTIONTIMEINTERVAL = 500; // Collection time interval i.e 125 = 8 per sec
     public static final int COLLECTIONTIMEDELAY = 0; // Collection time interval i.e 1000 = 1second
 
@@ -66,11 +76,20 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     TextView logsTxtBox;
     RadioGroup atividadesRadioGrp;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //uncomment to generate offline files for use in WEKA
+        //fft = new FFT(this.getApplicationContext());
+        //fft.generateFourierTransform(true);
+
+        //arff = new Arff(this.getApplicationContext());
+        //arff.generateArffFile(true);
+
+        //noiseFilter = new NoiseFilter(this.getApplicationContext());
+        //noiseFilter.calculateAverage();
 
         //find elements on view
         startBtn = (Button) findViewById(R.id.startBtn);
@@ -93,24 +112,19 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         // delete file (only for test , this shoud be removed later)
         fileManager.deleteFile(SENSORSDATAFILENAME);
 
-
         logsTxtBox.setText("Lista de Sensores:\n\n" +
                 "GPS" + "\n" +
                 "Acelerómetro" + "\n" +
                 "Luminosidade" + "\n" +
                 "Gravidade" + "\n" +
                 "Giroscópio" + "\n"
-
         );
-
-
         try {
             sensorsManager = SensorsManager.getInstance(this);
         } catch (NullPointerException ex) {
             ex.printStackTrace();
             finish();
         }
-
     }
 
     //this method will start sensors data collect
@@ -125,7 +139,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             submitBtn.setEnabled(false);
 
             //create new file to store sensors data, if doesn't exists
-            fileManager.createFile(this.getFilesDir() + "/" + SENSORSDATAFILENAME);
+            fileManager.createFile(this.getFilesDir() + "/" + SENSORSDATAFILENAME,FILEHEADER);
 
             //start sensors
             sensorsManager.startSensors(MainActivity.this);
@@ -134,7 +148,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         } else {
             gps.showSettingsAlert();
         }
-
     }
 
     //this method will stop sensors data collect
@@ -144,9 +157,15 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         stopBtn.setEnabled(false);
         submitBtn.setEnabled(true);
         sensorsManager.stopSensors();
+        arff=new Arff(this.getApplicationContext());
+        fileManager=new FileManager(this.getApplicationContext());
+
+        fileManager.deleteFile(REALTIMEARFFFILENAME);
+
+        //Convert csv to arff file
+        arff.convertCSVtoArff(REALTIMEARFFCSVFILENAME,REALTIMEARFFFILENAME);
 
         Utils.showToast(getApplicationContext(), "Pausou a recolha de dados");
-
     }
 
     //this function is used to upload file via sftp server.
@@ -170,7 +189,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 permissions.checkInternetPermissions();
                 Utils.showToast(getApplicationContext(), "Sem acesso á internet!");
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             Utils.showToast(getApplicationContext(), "Ocorreu um problema ao transferir o ficheiro");
         }
     }
@@ -191,7 +210,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         submitBtn.setEnabled(true);
         sensorsManager.stopSensors();
     }
-
 
     //this method is used to get current activity selected
     private String getSelectedActivity() {
@@ -230,9 +248,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     public void onLocationChanged(Location location) {
         synchronized (sensorsData) {
             gpsTextView.setText("GPS: " + location.getLatitude() + " , " + location.getLongitude());
-            sensorsData[0] = (float)location.getLatitude();
-            sensorsData[1] = (float)location.getLongitude();
-            sensorsData[2] = (float)location.getAltitude();
+            sensorsData[0] = (float) location.getLatitude();
+            sensorsData[1] = (float) location.getLongitude();
+            sensorsData[2] = (float) location.getAltitude();
 
             String activity = getSelectedActivity();
             if (activity == null) return;
@@ -243,9 +261,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                     return;
                 }
             }
-
             long timestamp = Calendar.getInstance().getTimeInMillis();
-            fileManager.writeDataToFile(SENSORSDATAFILENAME,sensorsData,timestamp,getSelectedActivity());
+
+            //stores data collected in a csv file
+            //fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
+
+            //Pre process data (filter noise and apply fourrier transform)
+            utils.preprocessesData(sensorsData, timestamp, getSelectedActivity());
         }
     }
 
@@ -265,8 +287,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                         deltaX = 0;
                     if (deltaY < 2)
                         deltaY = 0;
-
-
 
                     // get the change of the x,y,z values of the accelerometer
                     deltaX = Math.abs(lastX - event.values[0]);
@@ -355,13 +375,19 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             if (activity == null) return;
 
             //confirm if all values are completed
-           for (int i = 0; i < sensorsData.length; i++) {
+            for (int i = 0; i < sensorsData.length; i++) {
                 if (sensorsData[i] == null) {
                     return;
                 }
             }
             long timestamp = Calendar.getInstance().getTimeInMillis();
-            fileManager.writeDataToFile(SENSORSDATAFILENAME,sensorsData,timestamp,getSelectedActivity());
+
+            //stores data collected in a csv file
+            //fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
+
+            //Pre process data (filter noise and apply fourrier transform)
+            utils.preprocessesData(sensorsData, timestamp, getSelectedActivity());
+
         }
     }
 

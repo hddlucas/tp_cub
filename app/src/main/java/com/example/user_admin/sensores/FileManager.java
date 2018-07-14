@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.example.user_admin.sensores.MainActivity.FFTFILENAME;
@@ -27,11 +28,13 @@ public class FileManager {
     private List<String[]> rows = new ArrayList<>();
     private Utils utils;
     private NoiseFilter noiseFilter;
+    private Arff arff;
     private int N=64;
-    List<List<String>> fftExcelData = new ArrayList<List<String>>();
+    List<String[]> fftData = new ArrayList<>();
     public FileManager(Context context) {
         this.context = context;
         noiseFilter =new NoiseFilter(context);
+        arff = new Arff(context);
     }
 
     // This method will read data from internal storage file
@@ -61,8 +64,6 @@ public class FileManager {
     public void writeDataToFile(String filename, Float[] sensorsData,long timestamp,String activity) {
         FileOutputStream outputStream;
         String [] collection_line= new String[sensorsData.length+2];
-        String [] media= new String[sensorsData.length+2];
-
         try {
             outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
             String x="";
@@ -87,7 +88,13 @@ public class FileManager {
             rows.add(collection_line);
             if(rows.size()==N) {
                 //appply noise filter
-                media = noiseFilter.ApplyNoiseFilter(rows,aux);
+                fftData.add(noiseFilter.ApplyNoiseFilter(rows,aux));
+                if(fftData.size()==N){
+                    //generate arff file with fft transform
+                    arff.generateRealTimeArffFile(fftData,activity);
+
+                    fftData = new ArrayList<>();
+                }
                 rows = new ArrayList<>();
             }
 
@@ -96,7 +103,6 @@ public class FileManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     /**

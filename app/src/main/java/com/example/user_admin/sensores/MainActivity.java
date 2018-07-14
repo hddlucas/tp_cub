@@ -52,9 +52,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     public static final String SENSORSDATAAVERAGEFILENAME = "average.csv";
     public static final String ARFFSENSORSDATAAVERAGEFILENAME = "average.arff";
     public static final String ARFFCSVFILENAME = "arff.csv";
+    public static final String REALTIMEARFFCSVFILENAME = "real_time_arff.csv";
     public static final String FILTERED_NOISE_ARFFCSVFILENAME = "filtered_noise_arff.csv";
     public static final String FILTERED_NOISE_ARFFFILENAME = "filtered_noise_arff.arff";
     public static final String ARFFFILENAME = "arff.arff";
+    public static final String REALTIMEARFFFILENAME = "real_time_arff.arff";
     public static final String FFTFILENAME = "fft.csv";
     public static final String FILTERED_NOISE_FFTFILENAME = "filtered_noise_fft.csv";
     public static final String FILEHEADER = "lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_grav,y_grav,z_grav,lum,activity\n";
@@ -155,6 +157,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         stopBtn.setEnabled(false);
         submitBtn.setEnabled(true);
         sensorsManager.stopSensors();
+        arff=new Arff(this.getApplicationContext());
+        fileManager=new FileManager(this.getApplicationContext());
+
+        fileManager.deleteFile(REALTIMEARFFFILENAME);
+
+        //Convert csv to arff file
+        arff.convertCSVtoArff(REALTIMEARFFCSVFILENAME,REALTIMEARFFFILENAME);
 
         Utils.showToast(getApplicationContext(), "Pausou a recolha de dados");
     }

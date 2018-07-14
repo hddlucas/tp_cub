@@ -109,7 +109,7 @@ public class Utils {
                         if (predictedActivity != null) {
                             Utils.showToast(context, predictedActivity + "!");
                         }
-                    } else {
+                    } /*else {
                         //decision tree
                         ArrayList<List<String>> dataArff = new ArrayList<>();
                         dataArff = fft.applyFourrierTransform(fftData);
@@ -154,7 +154,7 @@ public class Utils {
                         }
 
                         Utils.showToast(context, predictedActivity + "!");
-                    }
+                    }*/
                     fftData = new ArrayList<>();
                 }
                 rows = new ArrayList<>();

@@ -96,10 +96,9 @@ public class Utils {
                 //appply noise filter
                 fftData.add(noiseFilter.ApplyNoiseFilter(rows, aux));
                 if (fftData.size() == N) {
-                    if (!BuildConfig.DEBUG) {
-                        //generate arff file with fft transform
-                        arff.generateRealTimeArffFile(fftData, activity, automaticMode);
-                    }
+                    //generate arff file with fft transform
+                    arff.generateRealTimeArffFile(fftData, activity, automaticMode);
+
                     if (automaticMode) {
                         // do something for a debug build
                         //Convert CSV to ARFF
@@ -112,7 +111,8 @@ public class Utils {
                         }
                     } else {
                         //decision tree
-                        ArrayList<List<String>> dataArff = fft.applyFourrierTransform(fftData);
+                        ArrayList<List<String>> dataArff = new ArrayList<>();
+                        dataArff = fft.applyFourrierTransform(fftData);
                         List<String> accelerometer = dataArff.get(0);
                         List<String> gyroscope = dataArff.get(1);
                         List<String> gravity =dataArff.get(2);

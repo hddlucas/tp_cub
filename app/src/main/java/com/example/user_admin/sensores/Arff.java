@@ -23,6 +23,7 @@ import static com.example.user_admin.sensores.MainActivity.ARFFCSVFILENAME;
 import static com.example.user_admin.sensores.MainActivity.ARFFFILENAME;
 import static com.example.user_admin.sensores.MainActivity.FILTERED_NOISE_ARFFCSVFILENAME;
 import static com.example.user_admin.sensores.MainActivity.FILTERED_NOISE_ARFFFILENAME;
+import static com.example.user_admin.sensores.MainActivity.TEST_ARFFCSVFILENAME;
 import static com.example.user_admin.sensores.MainActivity.TRAIN_ARFFCSVFILENAME;
 
 public class Arff {
@@ -62,7 +63,7 @@ public class Arff {
         }
     }
 
-    public void classifyFromARFF(String train_arff,String test_arff) throws Exception {//função classifyFromARFF
+    public String classifyFromARFF(String train_arff,String test_arff) throws Exception {//função classifyFromARFF
         FilteredClassifier fc = new FilteredClassifier();
 
         BufferedReader reader = new BufferedReader(new FileReader(context.getFilesDir() + "/" +train_arff));
@@ -80,10 +81,16 @@ public class Arff {
         reader = new BufferedReader(new FileReader(context.getFilesDir() + "/" +test_arff));
         Instances test = new Instances(reader); //leitura do ficheiro .arff de testes
         test.setClassIndex(test.numAttributes() - 1);
+        double pred=-0.0;
         for (int i = 0; i < test.numInstances(); i++) {
-            double pred = fc.classifyInstance(test.instance(i)); //classificação
-            System.out.println(test.classAttribute().value((int) pred)); //determinação da atividade
+            pred = fc.classifyInstance(test.instance(i)); //classificação
+            //System.out.println(test.classAttribute().value((int) pred)); //determinação da atividade
         }
+
+        return test.classAttribute().value((int) pred);
+
+
+
     }
 
 
@@ -250,7 +257,7 @@ public class Arff {
         }
     }
 
-    public void generateRealTimeArffFile(List<String[]> rows, String activity) {
+    public void generateRealTimeArffFile(List<String[]> rows, String activity,boolean automaticMode) {
         utils = new Utils(context);
         fileManager = new FileManager(context);
 
@@ -364,11 +371,11 @@ public class Arff {
                 auxCont++;
             }
         }
-        fileManager.createFile(context.getFilesDir() + "/" + TRAIN_ARFFCSVFILENAME, fileHeader);
+        fileManager.createFile(context.getFilesDir() + "/" + (automaticMode ? TEST_ARFFCSVFILENAME : TRAIN_ARFFCSVFILENAME), fileHeader);
         FileOutputStream outputStream;
         String s = "";
         try {
-            outputStream = context.openFileOutput(TRAIN_ARFFCSVFILENAME, Context.MODE_APPEND);
+            outputStream = context.openFileOutput((automaticMode ? TEST_ARFFCSVFILENAME : TRAIN_ARFFCSVFILENAME), Context.MODE_APPEND);
             Iterator<List<String>> iter = dataArff.iterator();
             while (iter.hasNext()) {
                 Iterator<String> siter = iter.next().iterator();

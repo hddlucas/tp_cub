@@ -172,11 +172,11 @@ public class FFT {
     }
 
     public  void beforeAfter(FFT fft, double[] re, double[] im) {
-        System.out.println("Before: ");
-        printReIm(re, im);
+        //System.out.println("Before: ");
+        //printReIm(re, im);
         fft.fft(re, im);
-        System.out.println("After: ");
-        printReIm(re, im);
+        //System.out.println("After: ");
+        //printReIm(re, im);
     }
 
     public  void printReIm(double[] re, double[] im) {

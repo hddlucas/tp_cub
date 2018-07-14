@@ -10,6 +10,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static com.example.user_admin.sensores.MainActivity.TEST_ARFFCSVFILENAME;
+import static com.example.user_admin.sensores.MainActivity.TEST_ARFFFILENAME;
+import static com.example.user_admin.sensores.MainActivity.TRAIN_ARFFFILENAME;
+
 
 /**
  * Created by USER-Admin on 26/03/2018.
@@ -71,7 +75,7 @@ public class Utils {
         return ret;
     }
 
-    public void preprocessesData(Float[] sensorsData,long timestamp,String activity){
+       public void preprocessesData(Float[] sensorsData,long timestamp,String activity,boolean automaticMode){
         String [] collection_line= new String[sensorsData.length+2];
         try {
             int aux=0;
@@ -90,13 +94,21 @@ public class Utils {
                 fftData.add(noiseFilter.ApplyNoiseFilter(rows,aux));
                 if(fftData.size()==N){
                     //generate arff file with fft transform
-                    arff.generateRealTimeArffFile(fftData,activity);
+                    arff.generateRealTimeArffFile(fftData,activity,automaticMode);
+                    if(automaticMode) {
+                        //Convert CSV to ARFF
+                        arff.convertCSVtoArff(TEST_ARFFCSVFILENAME,TEST_ARFFFILENAME);
 
+                        //Classify activity
+                        String predictedActivity=arff.classifyFromARFF(TRAIN_ARFFFILENAME,TEST_ARFFFILENAME);
+                        if(predictedActivity!=null){
+                            Utils.showToast(context, predictedActivity + "!");
+                        }
+                    }
                     fftData = new ArrayList<>();
                 }
                 rows = new ArrayList<>();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

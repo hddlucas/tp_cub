@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -91,6 +92,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     TextView acelerometroTextView;
     TextView logsTxtBox;
     RadioGroup atividadesRadioGrp;
+    CheckBox automaticMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +117,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         gpsTextView = findViewById(R.id.gpsTextView);
         acelerometroTextView = findViewById(R.id.acelerometroTextView);
         atividadesRadioGrp = (RadioGroup) findViewById(R.id.atividadesRadioGrp);
-
+        automaticMode = (CheckBox) findViewById(R.id.automaticModeCheckBox);
         stopBtn.setEnabled(false);
 
         //check location permissions (run time permissions)
@@ -153,6 +155,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             startBtn.setEnabled(false);
             stopBtn.setEnabled(true);
             submitBtn.setEnabled(false);
+            automaticMode.setEnabled(false);
 
             if(COLLECT_SENSORS_DATA) {
                 //create new file to store sensors data, if doesn't exists
@@ -174,12 +177,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         startBtn.setEnabled(true);
         stopBtn.setEnabled(false);
         submitBtn.setEnabled(true);
+        automaticMode.setEnabled(true);
         sensorsManager.stopSensors();
 
         if(!COLLECT_SENSORS_DATA) {
             fileManager=new FileManager(this.getApplicationContext());
             arff=new Arff(this.getApplicationContext());
-            fileManager.deleteFile(TRAIN_ARFFFILENAME);
+            //fileManager.deleteFile(TRAIN_ARFFFILENAME);
             //Convert csv to arff file
             arff.convertCSVtoArff(TRAIN_ARFFCSVFILENAME, TRAIN_ARFFFILENAME);
         }
@@ -291,7 +295,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             }
             else{
                 //Pre process data (filter noise and apply fourrier transform)
-                utils.preprocessesData(sensorsData, timestamp, getSelectedActivity());
+                utils.preprocessesData(sensorsData, timestamp, getSelectedActivity(),automaticMode.isChecked());
             }
         }
     }
@@ -413,7 +417,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             }
             else {
                   //Pre process data (filter noise and apply fourrier transform)
-                  utils.preprocessesData(sensorsData, timestamp, getSelectedActivity());
+                  utils.preprocessesData(sensorsData, timestamp, getSelectedActivity(),automaticMode.isChecked());
               }
 
         }

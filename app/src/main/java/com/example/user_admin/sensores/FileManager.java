@@ -25,16 +25,8 @@ import static com.example.user_admin.sensores.MainActivity.FILTERED_NOISE_FFTFIL
 public class FileManager {
 
     public Context context;
-    private List<String[]> rows = new ArrayList<>();
-    private Utils utils;
-    private NoiseFilter noiseFilter;
-    private Arff arff;
-    private int N=64;
-    List<String[]> fftData = new ArrayList<>();
     public FileManager(Context context) {
         this.context = context;
-        noiseFilter =new NoiseFilter(context);
-        arff = new Arff(context);
     }
 
     // This method will read data from internal storage file
@@ -68,35 +60,16 @@ public class FileManager {
             outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
             String x="";
             // append to file
-            int aux=0;
             for(int i=0;i<sensorsData.length;i++){
                 x+=sensorsData[i].toString() +",";
-                collection_line[aux]=sensorsData[i].toString();
                 if(i==2) {
-                    aux++;
                     x+=timestamp+",";
-                    collection_line[aux]= String.valueOf(timestamp);
                 }
-                aux++;
             }
 
             x+=activity+"\n";
-            collection_line[aux]=activity;
             outputStream.write(x.getBytes());
             x=null;
-
-            rows.add(collection_line);
-            if(rows.size()==N) {
-                //appply noise filter
-                fftData.add(noiseFilter.ApplyNoiseFilter(rows,aux));
-                if(fftData.size()==N){
-                    //generate arff file with fft transform
-                    arff.generateRealTimeArffFile(fftData,activity);
-
-                    fftData = new ArrayList<>();
-                }
-                rows = new ArrayList<>();
-            }
 
             outputStream.close();
 

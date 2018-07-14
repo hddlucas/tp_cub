@@ -262,7 +262,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 }
             }
             long timestamp = Calendar.getInstance().getTimeInMillis();
-            fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
+
+            //stores data collected in a csv file
+            //fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
+
+            //Pre process data (filter noise and apply fourrier transform)
+            utils.preprocessesData(sensorsData, timestamp, getSelectedActivity());
         }
     }
 
@@ -376,7 +381,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 }
             }
             long timestamp = Calendar.getInstance().getTimeInMillis();
-            fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
+
+            //stores data collected in a csv file
+            //fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
+
+            //Pre process data (filter noise and apply fourrier transform)
+            utils.preprocessesData(sensorsData, timestamp, getSelectedActivity());
+
         }
     }
 

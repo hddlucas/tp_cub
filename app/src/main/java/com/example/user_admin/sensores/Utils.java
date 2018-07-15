@@ -109,7 +109,7 @@ public class Utils {
                         if (predictedActivity != null) {
                             Utils.showToast(context, predictedActivity + "!");
                         }
-                    } /*else {
+                    } else {
                         //decision tree
                         ArrayList<List<String>> dataArff = new ArrayList<>();
                         dataArff = fft.applyFourrierTransform(fftData);
@@ -117,44 +117,46 @@ public class Utils {
                         List<String> gyroscope = dataArff.get(1);
                         List<String> gravity =dataArff.get(2);
 
-                        if (Double.parseDouble(gyroscope.get(0)) <= 14.873763) {
-                            if (Double.parseDouble(accelerometer.get(7)) <= 2.484912)
-                                predictedActivity = "DRIVING";
-                            predictedActivity = "GO_UPSTAIRS";
-                        } else if (Double.parseDouble(gyroscope.get(0)) > 14.873763) {
-                            if (Double.parseDouble(gyroscope.get(0)) <= 45.015215) {
-                                if (Double.parseDouble(accelerometer.get(22)) <= -1.93394)
-                                    predictedActivity = "GO_DOWNSTAIRS";
-                                else {
-                                    if (Double.parseDouble(accelerometer.get(0)) <= 624.991925)
-                                        if (Double.parseDouble(accelerometer.get(2)) <= -12.62418)
-                                            predictedActivity = "GO_DOWNSTAIRS";
-                                        else {
-                                            if (Double.parseDouble(gravity.get(4)) <= -7.23825)
-                                                predictedActivity = "GO_UPSTAIRS";
-                                            else {
-                                                if (Double.parseDouble(gravity.get(31)) <= 4.402636) {
-                                                    if (Double.parseDouble(accelerometer.get(10)) <= -16.574187)
-                                                        predictedActivity = "GO_UPSTAIRS";
-                                                    predictedActivity = "WALKING";
-                                                } else {
-                                                    if (Double.parseDouble(gyroscope.get(11)) <= 0.088658)
-                                                        predictedActivity = "GO_UPSTAIRS";
-                                                    predictedActivity = "GO_DOWNSTAIRS";
+                        if(Double.parseDouble(gyroscope.get(0)) <= 13.332064){
+                            if(Double.parseDouble(accelerometer.get(12)) <= -8.383365) predictedActivity = "GO_UPSTAIRS";
+                            else predictedActivity = "DRIVING";
+                        }
+                        else{
+                            if(Double.parseDouble(gyroscope.get(0)) <= 45.015215){
+                                if(Double.parseDouble(accelerometer.get(0)) <= 620.37343) {
+                                    if(Double.parseDouble(accelerometer.get(22)) <= -1.93394) predictedActivity = "GO_DOWNSTAIRS";
+                                    else{
+                                        if(Double.parseDouble(gyroscope.get(0)) <= 20.405637){
+                                            if(Double.parseDouble(accelerometer.get(1)) <= -8.934069) {
+                                                if(Double.parseDouble(accelerometer.get(1)) <= -11.110836) predictedActivity = "GO_DOWNSTAIRS";
+                                                else{
+                                                    if(Double.parseDouble(gyroscope.get(12)) <= -0.106214) predictedActivity = "WALKING";
+                                                    else predictedActivity = "GO_UPSTAIRS";
                                                 }
+                                            }else{predictedActivity = "GO_UPSTAIRS";}
+                                        }else{
+                                            if(Double.parseDouble(gravity.get(28)) <= 5.627389){
+                                                if(Double.parseDouble(gravity.get(11)) <= 1.371798) predictedActivity = "WALKING";
+                                                else predictedActivity = "GO_DOWNSTAIRS";
+                                            }
+                                            else{
+                                                if(Double.parseDouble(accelerometer.get(0)) <= 608.221722) predictedActivity = "GO_DOWNSTAIRS";
+                                                else predictedActivity = "GO_UPSTAIRS";
                                             }
                                         }
-                                    predictedActivity = "DRIVING";
+                                    }
+                                }else{
+                                    if(Double.parseDouble(accelerometer.get(0)) > 620.37343)
+                                        predictedActivity =  "DRIVING";
                                 }
-                            } else {
-                                if (Double.parseDouble(gyroscope.get(7)) <= -7.566398)
-                                    predictedActivity = "DRIVING";
-                                predictedActivity = "RUNNING";
+                            }else {
+                                if(Double.parseDouble(gyroscope.get(8)) <= -7.566398) predictedActivity = "DRIVING";
+                                else predictedActivity = "RUNNING";
                             }
                         }
 
                         Utils.showToast(context, predictedActivity + "!");
-                    }*/
+                    }
                     fftData = new ArrayList<>();
                 }
                 rows = new ArrayList<>();

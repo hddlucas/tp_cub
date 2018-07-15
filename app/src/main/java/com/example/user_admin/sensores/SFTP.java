@@ -20,10 +20,12 @@ public class SFTP implements Runnable {
     private Context context;
     FileManager fileManager;
     File file;
+    private boolean COLLECT_SENSORS_DATA=false;
 
-    public SFTP(Context context, File file) {
+    public SFTP(Context context, File file, boolean collect_sensors_data) {
         this.context = context;
         this.file = file;
+        this.COLLECT_SENSORS_DATA = collect_sensors_data;
     }
 
 
@@ -54,7 +56,7 @@ public class SFTP implements Runnable {
             // use the put method , if you are using android remember to remove "file://" and use only the relative path
             long timestamp = Calendar.getInstance().getTimeInMillis();
 
-            sftp.put(file.getPath() + "", "sensors_" + timestamp);
+            sftp.put(file.getPath() + "", (this.COLLECT_SENSORS_DATA == true ? "sensors_" : "train_") + timestamp);
 
             Boolean success = true;
 

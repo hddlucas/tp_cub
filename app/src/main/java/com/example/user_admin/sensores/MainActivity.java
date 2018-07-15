@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -34,6 +35,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     Arff arff;
     NoiseFilter noiseFilter;
 
+    //configurations
+
+    //if collect sensors_data = true means that the application will be storing the data collected in a csv
+    //if collect sensors_data = false means that the application is holding data and storing it in an arff file used as an activity classifier
+    private boolean COLLECT_SENSORS_DATA=false;
+
     SensorsManager<MainActivity> sensorsManager;
 
     private float lastX, lastY, lastZ;
@@ -49,20 +56,30 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
     //file to store sensors data
     public static final String SENSORSDATAFILENAME = "sensors.csv";
+
+    //noise filter file (average)
     public static final String SENSORSDATAAVERAGEFILENAME = "average.csv";
-    public static final String ARFFSENSORSDATAAVERAGEFILENAME = "average.arff";
-    public static final String ARFFCSVFILENAME = "arff.csv";
-    public static final String REALTIMEARFFCSVFILENAME = "real_time_arff.csv";
-    public static final String FILTERED_NOISE_ARFFCSVFILENAME = "filtered_noise_arff.csv";
+
+    //fft files
+    public static final String FFTFILENAME = "fft_all.csv";
+    public static final String FILTERED_NOISE_FFTFILENAME = "filtered_noise_fft_all.csv";
+
+    //arff files
+    public static final String ARFFFILENAME = "arff_all.arff";
+    public static final String TRAIN_ARFFFILENAME = "train.arff";
+    public static final String TEST_ARFFFILENAME = "test.arff";
     public static final String FILTERED_NOISE_ARFFFILENAME = "filtered_noise_arff.arff";
-    public static final String ARFFFILENAME = "arff.arff";
-    public static final String REALTIMEARFFFILENAME = "real_time_arff.arff";
-    public static final String FFTFILENAME = "fft.csv";
-    public static final String FILTERED_NOISE_FFTFILENAME = "filtered_noise_fft.csv";
+    public static final String ARFFSENSORSDATAAVERAGEFILENAME = "average.arff";
+
+    //cvs files used to generate arff files
+    public static final String ARFFCSVFILENAME = "arff_all.csv";
+    public static final String TRAIN_ARFFCSVFILENAME = "train.csv";
+    public static final String TEST_ARFFCSVFILENAME = "test.csv";
+    public static final String FILTERED_NOISE_ARFFCSVFILENAME = "filtered_noise_arff.csv";
+
     public static final String FILEHEADER = "lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_grav,y_grav,z_grav,lum,activity\n";
     public static final String FFTFILEHEADER = "Time,Data ACC,FFT freq ACC,Serie,FFT mag ACC,FFT Complex ACC,Data GYRO,FFT freq GYRO,Serie,FFT mag GYRO,FFT Complex GYRO,Data GRAV,FFT freq GRAV,Serie,FFT mag GRAV,FFT Complex GRAV,Activity\n";
     public static final String[] ACTIVITIES = new String[]{"WALKING","RUNNING","DRIVING","GO_UPSTAIRS","GO_DOWNSTAIRS"};
-
 
     public static final int COLLECTIONTIMEINTERVAL = 500; // Collection time interval i.e 125 = 8 per sec
     public static final int COLLECTIONTIMEDELAY = 0; // Collection time interval i.e 1000 = 1second
@@ -75,6 +92,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     TextView acelerometroTextView;
     TextView logsTxtBox;
     RadioGroup atividadesRadioGrp;
+    CheckBox automaticMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +117,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         gpsTextView = findViewById(R.id.gpsTextView);
         acelerometroTextView = findViewById(R.id.acelerometroTextView);
         atividadesRadioGrp = (RadioGroup) findViewById(R.id.atividadesRadioGrp);
-
+        automaticMode = (CheckBox) findViewById(R.id.automaticModeCheckBox);
         stopBtn.setEnabled(false);
 
         //check location permissions (run time permissions)
@@ -137,9 +155,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             startBtn.setEnabled(false);
             stopBtn.setEnabled(true);
             submitBtn.setEnabled(false);
+            automaticMode.setEnabled(false);
 
-            //create new file to store sensors data, if doesn't exists
-            fileManager.createFile(this.getFilesDir() + "/" + SENSORSDATAFILENAME,FILEHEADER);
+            if(COLLECT_SENSORS_DATA) {
+                //create new file to store sensors data, if doesn't exists
+                fileManager.createFile(this.getFilesDir() + "/" + SENSORSDATAFILENAME, FILEHEADER);
+            }
 
             //start sensors
             sensorsManager.startSensors(MainActivity.this);
@@ -156,14 +177,16 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         startBtn.setEnabled(true);
         stopBtn.setEnabled(false);
         submitBtn.setEnabled(true);
+        automaticMode.setEnabled(true);
         sensorsManager.stopSensors();
-        arff=new Arff(this.getApplicationContext());
-        fileManager=new FileManager(this.getApplicationContext());
 
-        fileManager.deleteFile(REALTIMEARFFFILENAME);
-
-        //Convert csv to arff file
-        arff.convertCSVtoArff(REALTIMEARFFCSVFILENAME,REALTIMEARFFFILENAME);
+        if(!COLLECT_SENSORS_DATA) {
+            fileManager=new FileManager(this.getApplicationContext());
+            arff=new Arff(this.getApplicationContext());
+            //fileManager.deleteFile(TRAIN_ARFFFILENAME);
+            //Convert csv to arff file
+            arff.convertCSVtoArff(TRAIN_ARFFCSVFILENAME, TRAIN_ARFFFILENAME);
+        }
 
         Utils.showToast(getApplicationContext(), "Pausou a recolha de dados");
     }
@@ -171,11 +194,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
     //this function is used to upload file via sftp server.
     public void submitBtnClick(View view) {
         try {
+
             if (isNetworkAvailable()) {
-                File file = new File(this.getFilesDir() + "/" + SENSORSDATAFILENAME);
+                File file = new File(this.getFilesDir() + "/" + (COLLECT_SENSORS_DATA == true ? SENSORSDATAFILENAME : TRAIN_ARFFFILENAME));
                 if (file.exists()) {
 
-                    Runnable sftp = new SFTP(MainActivity.this, file);
+                    Runnable sftp = new SFTP(MainActivity.this, file,COLLECT_SENSORS_DATA);
                     Thread t = new Thread(sftp);
                     t.setDaemon(true);
                     t.start();
@@ -189,6 +213,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
                 permissions.checkInternetPermissions();
                 Utils.showToast(getApplicationContext(), "Sem acesso á internet!");
             }
+
+
         } catch (Exception ex) {
             Utils.showToast(getApplicationContext(), "Ocorreu um problema ao transferir o ficheiro");
         }
@@ -263,11 +289,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             }
             long timestamp = Calendar.getInstance().getTimeInMillis();
 
-            //stores data collected in a csv file
-            //fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
-
-            //Pre process data (filter noise and apply fourrier transform)
-            utils.preprocessesData(sensorsData, timestamp, getSelectedActivity());
+            if(COLLECT_SENSORS_DATA) {
+                //stores data collected in a csv file
+                fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
+            }
+            else{
+                //Pre process data (filter noise and apply fourrier transform)
+                utils.preprocessesData(sensorsData, timestamp, getSelectedActivity(),automaticMode.isChecked());
+            }
         }
     }
 
@@ -382,11 +411,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             }
             long timestamp = Calendar.getInstance().getTimeInMillis();
 
-            //stores data collected in a csv file
-            //fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
-
-            //Pre process data (filter noise and apply fourrier transform)
-            utils.preprocessesData(sensorsData, timestamp, getSelectedActivity());
+              if(COLLECT_SENSORS_DATA) {
+                //stores data collected in a csv file
+                fileManager.writeDataToFile(SENSORSDATAFILENAME, sensorsData, timestamp, getSelectedActivity());
+            }
+            else {
+                  //Pre process data (filter noise and apply fourrier transform)
+                  utils.preprocessesData(sensorsData, timestamp, getSelectedActivity(),automaticMode.isChecked());
+              }
 
         }
     }
